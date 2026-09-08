@@ -22,6 +22,7 @@ import {
 
 export default function Registro({
   irLogin,
+  irInicio,
   registrarUsuario,
 }) {
   const [

@@ -19,6 +19,7 @@ import {
 
 export default function Login({
   irRegistro,
+  irInicio,
   usuario,
 }) {
   const [correo, setCorreo] = useState("");
@@ -49,10 +50,7 @@ export default function Login({
       correo.trim() === usuario.correo &&
       contrasena === usuario.contrasena
     ) {
-      setMensaje(
-        "Inicio de sesión correcto."
-      );
-
+      irInicio();
       return;
     }
 
@@ -104,6 +102,7 @@ export default function Login({
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.login}>
+
           <Image
             source={require("../assets/logo.png")}
             style={styles.logo}
@@ -163,6 +162,7 @@ export default function Login({
           </TouchableOpacity>
 
           <View style={styles.zonaRegistro}>
+
             <Text style={styles.textoSinCuenta}>
               ¿No tienes cuenta?
             </Text>
@@ -174,6 +174,7 @@ export default function Login({
                 Regístrate
               </Text>
             </TouchableOpacity>
+
           </View>
 
           {mensaje !== "" && (
@@ -197,6 +198,7 @@ export default function Login({
               style={styles.lineaInferior}
             />
           </View>
+
         </View>
       </ScrollView>
     </AuthLayout>
@@ -204,6 +206,7 @@ export default function Login({
 }
 
 const styles = StyleSheet.create({
+
   scroll: {
     flex: 1,
     width: "100%",
@@ -220,25 +223,15 @@ const styles = StyleSheet.create({
   login: {
     width: "98%",
     maxWidth: 360,
-
     paddingHorizontal: 18,
     paddingTop: 18,
     paddingBottom: 22,
-
-    backgroundColor:
-      COLORES.tarjeta,
-
+    backgroundColor: COLORES.tarjeta,
     borderWidth: 2,
-
-    borderColor:
-      COLORES.bordeTarjeta,
-
+    borderColor: COLORES.bordeTarjeta,
     borderRadius: 20,
-
     flexDirection: "column",
-
     justifyContent: "center",
-
     alignItems: "center",
   },
 
@@ -250,219 +243,129 @@ const styles = StyleSheet.create({
 
   titulo: {
     width: "100%",
-
-    color:
-      COLORES.crema,
-
-    fontFamily:
-      FUENTES.principal,
-
+    color: COLORES.crema,
+    fontFamily: FUENTES.principal,
     fontWeight: "bold",
-
     fontSize: 20,
-
     letterSpacing: 2.5,
-
     textAlign: "center",
   },
 
   decoracion: {
     flexDirection: "row",
-
     justifyContent: "center",
-
     alignItems: "center",
-
     marginTop: 7,
-
     marginBottom: 9,
   },
 
   linea: {
     width: 30,
-
     height: 1,
-
-    backgroundColor:
-      COLORES.dorado,
+    backgroundColor: COLORES.dorado,
   },
 
   diamante: {
     width: 7,
-
     height: 7,
-
     marginHorizontal: 9,
-
     borderWidth: 1,
-
-    borderColor:
-      COLORES.dorado,
-
-    transform: [
-      {
-        rotate: "45deg",
-      },
-    ],
+    borderColor: COLORES.dorado,
+    transform: [{ rotate: "45deg" }],
   },
 
   subtitulo: {
     width: "100%",
-
-    color:
-      COLORES.doradoClaro,
-
-    fontFamily:
-      FUENTES.principal,
-
+    color: COLORES.doradoClaro,
+    fontFamily: FUENTES.principal,
     fontSize: 7,
-
     letterSpacing: 1.5,
-
     textAlign: "center",
-
     marginBottom: 18,
   },
 
   recuperar: {
     alignSelf: "flex-start",
-
     marginBottom: 13,
-
     paddingVertical: 3,
   },
 
   textoRecuperar: {
-    color:
-      COLORES.doradoTexto,
-
-    fontFamily:
-      FUENTES.principal,
-
+    color: COLORES.doradoTexto,
+    fontFamily: FUENTES.principal,
     fontSize: 7,
   },
 
   botonLogin: {
     width: "100%",
-
     height: 48,
-
-    backgroundColor:
-      COLORES.boton,
-
+    backgroundColor: COLORES.boton,
     borderWidth: 1,
-
-    borderColor:
-      COLORES.botonBorde,
-
+    borderColor: COLORES.botonBorde,
     borderRadius: 10,
-
     justifyContent: "center",
-
     alignItems: "center",
   },
 
   textoBotonLogin: {
-    color:
-      COLORES.botonTexto,
-
-    fontFamily:
-      FUENTES.principal,
-
+    color: COLORES.botonTexto,
+    fontFamily: FUENTES.principal,
     fontWeight: "bold",
-
     fontSize: 9.5,
-
     letterSpacing: 1.3,
   },
 
   zonaRegistro: {
     width: "100%",
-
     flexDirection: "row",
-
     justifyContent: "center",
-
     alignItems: "center",
-
     marginTop: 14,
   },
 
   textoSinCuenta: {
-    color:
-      COLORES.textoSecundario,
-
-    fontFamily:
-      FUENTES.principal,
-
+    color: COLORES.textoSecundario,
+    fontFamily: FUENTES.principal,
     fontSize: 8,
   },
 
   textoRegistro: {
-    color:
-      COLORES.doradoClaro,
-
-    fontFamily:
-      FUENTES.principal,
-
+    color: COLORES.doradoClaro,
+    fontFamily: FUENTES.principal,
     fontWeight: "bold",
-
     fontSize: 8,
-
     marginLeft: 5,
   },
 
   mensaje: {
     width: "100%",
-
-    color:
-      COLORES.mensaje,
-
-    fontFamily:
-      FUENTES.principal,
-
+    color: COLORES.mensaje,
+    fontFamily: FUENTES.principal,
     fontSize: 7,
-
     textAlign: "center",
-
     marginTop: 10,
   },
 
   decoracionInferior: {
     flexDirection: "row",
-
     justifyContent: "center",
-
     alignItems: "center",
-
     marginTop: 15,
   },
 
   lineaInferior: {
     width: 31,
-
     height: 1,
-
-    backgroundColor:
-      COLORES.linea,
+    backgroundColor: COLORES.linea,
   },
 
   diamanteInferior: {
     width: 6,
-
     height: 6,
-
     marginHorizontal: 10,
-
     borderWidth: 1,
-
-    borderColor:
-      COLORES.dorado,
-
-    transform: [
-      {
-        rotate: "45deg",
-      },
-    ],
+    borderColor: COLORES.dorado,
+    transform: [{ rotate: "45deg" }],
   },
+
 });
