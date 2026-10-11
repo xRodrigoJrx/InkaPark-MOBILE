@@ -1,40 +1,22 @@
 import React, { useState } from "react";
 
-import Login from "./screens/Login";
-import Registro from "./screens/Registro";
-import Inicio from "./screens/Inicio";
+import { NavigationContainer } from "@react-navigation/native";
+
+import AppStack from "./src/navigation/AppStack";
 
 export default function App() {
-  const [pantalla, setPantalla] = useState("login");
   const [usuario, setUsuario] = useState(null);
 
-  const registrarUsuario = (nuevoUsuario) => {
-    setUsuario(nuevoUsuario);
-    setPantalla("login");
-  };
-
-  if (pantalla === "registro") {
-    return (
-      <Registro
-        irLogin={() => setPantalla("login")}
-        registrarUsuario={registrarUsuario}
-      />
-    );
-  }
-
-  if (pantalla === "inicio") {
-    return (
-      <Inicio
-        usuario={usuario}
-      />
-    );
-  }
+  const [sesionActiva, setSesionActiva] = useState(false);
 
   return (
-    <Login
-      irRegistro={() => setPantalla("registro")}
-      irInicio={() => setPantalla("inicio")}
-      usuario={usuario}
-    />
+    <NavigationContainer>
+      <AppStack
+        usuario={usuario}
+        setUsuario={setUsuario}
+        sesionActiva={sesionActiva}
+        setSesionActiva={setSesionActiva}
+      />
+    </NavigationContainer>
   );
-}             
+}

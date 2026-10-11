@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "codigo": "INK-A7B2-C3D4",
+    "tipo": "Entrada General",
+    "titular": "RODRIGO ALEON",
+    "documento": "DNI 74382910",
+    "fecha": "15 NOV 2024",
+    "hora": "10:00",
+    "estado": "activa",
+    "zona": "Todas las zonas",
+    "acompanantes": 0,
+    "precio": "S/ 85.00",
+    "color": "#2E7D32"
+  },
+  {
+    "id": 2,
+    "codigo": "INK-D8E5-F1A3",
+    "tipo": "Entrada VIP",
+    "titular": "RODRIGO ALEON",
+    "documento": "DNI 74382910",
+    "fecha": "15 NOV 2024",
+    "hora": "09:00",
+    "estado": "activa",
+    "zona": "Zona Aventura + Backstage",
+    "acompanantes": 1,
+    "precio": "S/ 180.00",
+    "color": "#D9AD38"
+  },
+  {
+    "id": 3,
+    "codigo": "INK-B9C1-D2E8",
+    "tipo": "Entrada Familiar",
+    "titular": "RODRIGO ALEON",
+    "documento": "DNI 74382910",
+    "fecha": "20 OCT 2024",
+    "hora": "11:30",
+    "estado": "usada",
+    "zona": "Zona Familiar",
+    "acompanantes": 3,
+    "precio": "S/ 320.00",
+    "color": "#8B5E3C"
+  },
+  {
+    "id": 4,
+    "codigo": "INK-F3A7-B4D9",
+    "tipo": "Entrada Nocturna",
+    "titular": "RODRIGO ALEON",
+    "documento": "DNI 74382910",
+    "fecha": "05 SET 2024",
+    "hora": "19:00",
+    "estado": "expirada",
+    "zona": "Zona Cultural",
+    "acompanantes": 0,
+    "precio": "S/ 95.00",
+    "color": "#6A1B9A"
+  },
+  {
+    "id": 5,
+    "codigo": "INK-C2B8-A5E7",
+    "tipo": "Entrada Estudiante",
+    "titular": "RODRIGO ALEON",
+    "documento": "DNI 74382910",
+    "fecha": "22 DIC 2024",
+    "hora": "14:00",
+    "estado": "activa",
+    "zona": "Todas las zonas",
+    "acompanantes": 0,
+    "precio": "S/ 55.00",
+    "color": "#1565C0"
+  }
+]

@@ -1,20 +1,18 @@
 import React from "react";
 
-import {
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import {
-  COLORES,
-  FUENTES,
-} from "../../styles/paleta";
+import { Text, HelperText, ProgressBar } from "react-native-paper";
+
+import { COLORES, FUENTES } from "../styles/paleta";
 
 export function MensajeValidacion({
   mostrar,
+
   correcto,
+
   textoCorrecto,
+
   textoError,
 }) {
   if (!mostrar) {
@@ -22,77 +20,75 @@ export function MensajeValidacion({
   }
 
   return (
-    <Text
-      style={[
-        styles.mensaje,
-        {
-          color: correcto
-            ? COLORES.correcto
-            : COLORES.error,
-        },
-      ]}
+    <HelperText
+      type={correcto ? "info" : "error"}
+      visible={true}
+      style={styles.mensaje}
     >
-      {correcto
-        ? textoCorrecto
-        : textoError}
-    </Text>
+      {correcto ? textoCorrecto : textoError}
+    </HelperText>
   );
 }
 
-export function NivelContrasena({
-  nivel,
-}) {
+export function NivelContrasena({ nivel }) {
   if (nivel === 0) {
     return null;
   }
 
   let texto = "";
+
   let color = COLORES.error;
-  let ancho = "25%";
 
-  if (nivel === 1) {
-    texto = "Contraseña débil";
-    color = COLORES.error;
-    ancho = "25%";
-  }
+  let progreso = 0;
 
-  if (nivel === 2) {
-    texto = "Contraseña regular";
-    color = COLORES.advertencia;
-    ancho = "50%";
-  }
+  switch (nivel) {
+    case 1:
+      texto = "Contraseña débil";
 
-  if (nivel === 3) {
-    texto = "Contraseña buena";
-    color = COLORES.doradoClaro;
-    ancho = "75%";
-  }
+      color = COLORES.error;
 
-  if (nivel === 4) {
-    texto = "Contraseña segura";
-    color = COLORES.correcto;
-    ancho = "100%";
+      progreso = 0.25;
+
+      break;
+
+    case 2:
+      texto = "Contraseña regular";
+
+      color = COLORES.advertencia;
+
+      progreso = 0.5;
+
+      break;
+
+    case 3:
+      texto = "Contraseña buena";
+
+      color = COLORES.doradoClaro;
+
+      progreso = 0.75;
+
+      break;
+
+    case 4:
+      texto = "Contraseña segura";
+
+      color = COLORES.correcto;
+
+      progreso = 1;
+
+      break;
   }
 
   return (
     <View style={styles.nivel}>
-      <View style={styles.barraFondo}>
-        <View
-          style={[
-            styles.barra,
-            {
-              width: ancho,
-              backgroundColor: color,
-            },
-          ]}
-        />
-      </View>
+      <ProgressBar progress={progreso} color={color} style={styles.progreso} />
 
       <Text
         style={[
           styles.textoNivel,
+
           {
-            color,
+            color: color,
           },
         ]}
       >
@@ -104,10 +100,9 @@ export function NivelContrasena({
 
 const styles = StyleSheet.create({
   mensaje: {
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
-    fontSize: 7,
+    fontSize: 8,
 
     marginTop: -7,
 
@@ -122,31 +117,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
-  barraFondo: {
-    width: "100%",
+  progreso: {
+    height: 5,
 
-    height: 4,
+    borderRadius: 10,
 
-    borderRadius: 5,
-
-    backgroundColor:
-      "rgba(255,255,255,0.12)",
-
-    overflow: "hidden",
-  },
-
-  barra: {
-    height: "100%",
-
-    borderRadius: 5,
+    backgroundColor: "rgba(255,255,255,0.12)",
   },
 
   textoNivel: {
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
     fontSize: 7,
 
-    marginTop: 4,
+    marginTop: 5,
   },
 });

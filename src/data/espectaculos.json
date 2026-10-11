@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "nombre": "DANZA DEL SOL",
+    "tipo": "Danza tradicional",
+    "duracion": "25 min",
+    "horarios": ["12:00", "16:00", "19:30"],
+    "ubicacion": "Coliseo Andino",
+    "invitacion": "Una noche bajo el sol eterno",
+    "descripcion": "Danza y música en vivo celebrando al dios Inti.",
+    "descripcionLarga": "Una puesta en escena con más de 30 bailarines, vestuarios tradicionales y música en vivo con instrumentos andinos.",
+    "color": "#D9AD38"
+  },
+  {
+    "id": 2,
+    "nombre": "LEYENDA DEL JAGUAR",
+    "tipo": "Teatro ancestral",
+    "duracion": "40 min",
+    "horarios": ["13:00", "17:00", "20:00"],
+    "ubicacion": "Anfiteatro Selva",
+    "invitacion": "El mito cobra vida",
+    "descripcion": "Teatro ancestral que narra la leyenda del jaguar sagrado.",
+    "descripcionLarga": "Una obra teatral con efectos especiales, acrobacias aéreas y proyecciones que narran la leyenda amazónica del jaguar guardián.",
+    "color": "#B71C1C"
+  },
+  {
+    "id": 3,
+    "nombre": "MÚSICA ANDINA EN VIVO",
+    "tipo": "Concierto",
+    "duracion": "30 min",
+    "horarios": ["11:30", "15:30", "18:30"],
+    "ubicacion": "Plaza del Sol",
+    "invitacion": "El sonido de los Andes",
+    "descripcion": "Concierto con instrumentos tradicionales andinos.",
+    "descripcionLarga": "Un recorrido musical por quenas, zampoñas, charangos y tambores, interpretando piezas ancestrales y contemporáneas.",
+    "color": "#2E7D32"
+  },
+  {
+    "id": 4,
+    "nombre": "CEREMONIA DEL FUEGO",
+    "tipo": "Espectáculo nocturno",
+    "duracion": "20 min",
+    "horarios": ["21:00"],
+    "ubicacion": "Plaza Central",
+    "invitacion": "Cuando cae la noche, el fuego despierta",
+    "descripcion": "Ceremonia de fuego, luces y danza al aire libre.",
+    "descripcionLarga": "Un cierre de jornada con antorchas, danzas de fuego y un mapping de luces sobre la pirámide principal. Solo los viernes, sábados y domingos.",
+    "color": "#E65100"
+  }
+]
