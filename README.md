@@ -218,14 +218,4 @@ La rama no define scripts de tests, lint o typecheck. La revisión funcional deb
 - Algunas opciones del perfil son visuales y aún no tienen acciones.
 - `BotonInka.js`, `Validador.js` e `imagenesAtracciones.js` existen, pero no están conectados a las pantallas actuales.
 
-## Ramas y documentación de evaluación
-
-- `main`: versión del avance anterior al momento de esta revisión.
-- `avance-2-ui-framework`: integración del framework visual, navegación y nuevas pantallas.
-
-Consulta [Evidencias de la rúbrica](docs/EVIDENCIAS_RUBRICA.md) para encontrar fragmentos de código, explicación de su uso y una guía de verificación.
-
-## Licencia
-
-El repositorio incluye un archivo `LICENSE` con licencia MIT.
 
