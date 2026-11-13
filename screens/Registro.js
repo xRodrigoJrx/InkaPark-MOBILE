@@ -1,84 +1,54 @@
 import React, { useState } from "react";
 
+import { StyleSheet, View } from "react-native";
+
 import {
-  StyleSheet,
+  Button,
+  HelperText,
+  ProgressBar,
+  Snackbar,
   Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+} from "react-native-paper";
 
 import AuthLayout from "../src/components/AuthLayout";
+
 import Campo from "../src/components/Campo";
 
-import {
-  MensajeValidacion,
-  NivelContrasena,
-} from "../src/components/Validador";
-
-import {
-  COLORES,
-  FUENTES,
-} from "../styles/paleta";
+import { COLORES, FUENTES } from "../src/styles/paleta";
 
 export default function Registro({
-  irLogin,
-  irInicio,
+  navigation,
+
   registrarUsuario,
 }) {
-  const [
-    nombre,
-    setNombre,
-  ] = useState("");
+  const [nombre, setNombre] = useState("");
 
-  const [
-    correo,
-    setCorreo,
-  ] = useState("");
+  const [correo, setCorreo] = useState("");
 
-  const [
-    telefono,
-    setTelefono,
-  ] = useState("");
+  const [telefono, setTelefono] = useState("");
 
-  const [
-    contrasena,
-    setContrasena,
-  ] = useState("");
+  const [contrasena, setContrasena] = useState("");
 
-  const [
-    confirmar,
-    setConfirmar,
-  ] = useState("");
+  const [confirmar, setConfirmar] = useState("");
 
-  const [
-    mensaje,
-    setMensaje,
-  ] = useState("");
+  const [mensaje, setMensaje] = useState("");
 
-  const correoValido =
-    correo.includes("@") &&
-    correo.includes(".");
+  const [tipoMensaje, setTipoMensaje] = useState("error");
 
-  const telefonoValido =
-    telefono.length === 9 &&
-    telefono.startsWith("9");
+  const correoValido = correo.includes("@") && correo.includes(".");
+
+  const telefonoValido = telefono.length === 9 && telefono.startsWith("9");
 
   const contrasenasIguales =
-    contrasena !== "" &&
-    confirmar !== "" &&
-    contrasena === confirmar;
+    contrasena !== "" && confirmar !== "" && contrasena === confirmar;
 
   let nivelContrasena = 0;
 
-  if (
-    contrasena.length > 0
-  ) {
+  if (contrasena.length > 0) {
     nivelContrasena = 1;
   }
 
-  if (
-    contrasena.length >= 6
-  ) {
+  if (contrasena.length >= 6) {
     nivelContrasena = 2;
   }
 
@@ -99,18 +69,17 @@ export default function Registro({
     nivelContrasena = 4;
   }
 
-  const cambiarTelefono =
-    (texto) => {
-      const soloNumeros =
-        texto.replace(
-          /[^0-9]/g,
-          ""
-        );
+  const cambiarTelefono = (texto) => {
+    const numeros = texto.replace(/[^0-9]/g, "");
 
-      setTelefono(
-        soloNumeros
-      );
-    };
+    setTelefono(numeros);
+  };
+
+  const mostrarError = (texto) => {
+    setTipoMensaje("error");
+
+    setMensaje(texto);
+  };
 
   const crearCuenta = () => {
     if (
@@ -120,105 +89,67 @@ export default function Registro({
       contrasena.trim() === "" ||
       confirmar.trim() === ""
     ) {
-      setMensaje(
-        "Completa todos los campos."
-      );
+      mostrarError("Completa todos los campos.");
 
       return;
     }
 
     if (!correoValido) {
-      setMensaje(
-        "Ingresa un correo válido."
-      );
+      mostrarError("Ingresa un correo válido.");
 
       return;
     }
 
     if (!telefonoValido) {
-      setMensaje(
-        "Ingresa un teléfono válido."
-      );
+      mostrarError("Ingresa un teléfono válido.");
 
       return;
     }
 
-    if (
-      nivelContrasena < 3
-    ) {
-      setMensaje(
-        "La contraseña debe ser más segura."
-      );
+    if (nivelContrasena < 3) {
+      mostrarError("La contraseña debe ser más segura.");
 
       return;
     }
 
-    if (
-      !contrasenasIguales
-    ) {
-      setMensaje(
-        "Las contraseñas no coinciden."
-      );
+    if (!contrasenasIguales) {
+      mostrarError("Las contraseñas no coinciden.");
 
       return;
     }
 
     const nuevoUsuario = {
       nombre: nombre.trim(),
+
       correo: correo.trim(),
-      telefono: telefono,
-      contrasena: contrasena,
+
+      telefono,
+
+      contrasena,
     };
 
-    registrarUsuario(
-      nuevoUsuario
-    );
-  };
+    setTipoMensaje("success");
 
+    setMensaje("Cuenta creada correctamente.");
+
+    registrarUsuario(nuevoUsuario);
+
+    navigation.replace("Login");
+  };
   return (
     <AuthLayout>
-      <View
-        style={
-          styles.registro
-        }
-      >
-        <Text
-          style={
-            styles.titulo
-          }
-        >
-          REGÍSTRATE
-        </Text>
+      <View style={styles.registro}>
+        <Text style={styles.titulo}>REGÍSTRATE</Text>
 
-        <View
-          style={
-            styles.decoracion
-          }
-        >
-          <View
-            style={
-              styles.linea
-            }
-          />
+        <View style={styles.decoracion}>
+          <View style={styles.linea} />
 
-          <View
-            style={
-              styles.diamante
-            }
-          />
+          <View style={styles.diamante} />
 
-          <View
-            style={
-              styles.linea
-            }
-          />
+          <View style={styles.linea} />
         </View>
 
-        <Text
-          style={
-            styles.subtitulo
-          }
-        >
+        <Text style={styles.subtitulo}>
           CREA TU CUENTA Y EMPIEZA TU AVENTURA
         </Text>
 
@@ -226,9 +157,7 @@ export default function Registro({
           titulo="NOMBRE COMPLETO"
           placeholder="Tu nombre completo"
           valor={nombre}
-          cambiarValor={
-            setNombre
-          }
+          cambiarValor={setNombre}
           esPassword={false}
           tipoTeclado="default"
         />
@@ -237,140 +166,131 @@ export default function Registro({
           titulo="CORREO"
           placeholder="correo@gmail.com"
           valor={correo}
-          cambiarValor={
-            setCorreo
-          }
+          cambiarValor={setCorreo}
           esPassword={false}
           tipoTeclado="email-address"
         />
 
-        <MensajeValidacion
-          mostrar={
-            correo.length > 3
-          }
-          correcto={
-            correoValido
-          }
-          textoCorrecto="Correo válido"
-          textoError="Correo no válido"
-        />
+        <HelperText
+          type={correoValido ? "info" : "error"}
+          visible={correo.length > 3}
+          style={styles.helper}
+        >
+          {correoValido ? "Correo válido" : "Correo no válido"}
+        </HelperText>
 
         <Campo
           titulo="TELÉFONO"
           placeholder="987654321"
           valor={telefono}
-          cambiarValor={
-            cambiarTelefono
-          }
+          cambiarValor={cambiarTelefono}
           esPassword={false}
           tipoTeclado="phone-pad"
           maxLength={9}
         />
 
-        <MensajeValidacion
-          mostrar={
-            telefono.length > 0
-          }
-          correcto={
-            telefonoValido
-          }
-          textoCorrecto="Número válido"
-          textoError="Debe tener 9 dígitos y comenzar con 9"
-        />
+        <HelperText
+          type={telefonoValido ? "info" : "error"}
+          visible={telefono.length > 0}
+          style={styles.helper}
+        >
+          {telefonoValido
+            ? "Número válido"
+            : "Debe tener 9 dígitos y comenzar con 9"}
+        </HelperText>
 
         <Campo
           titulo="CONTRASEÑA"
           placeholder="••••••••"
           valor={contrasena}
-          cambiarValor={
-            setContrasena
-          }
+          cambiarValor={setContrasena}
           esPassword={true}
           tipoTeclado="default"
         />
 
-        <NivelContrasena
-          nivel={
-            nivelContrasena
-          }
-        />
+        {nivelContrasena > 0 && (
+          <View style={styles.nivel}>
+            <ProgressBar
+              progress={nivelContrasena / 4}
+              color={
+                nivelContrasena === 4
+                  ? COLORES.correcto
+                  : nivelContrasena === 3
+                    ? COLORES.doradoClaro
+                    : COLORES.error
+              }
+              style={styles.progreso}
+            />
+
+            <Text style={styles.textoNivel}>
+              {nivelContrasena === 1 && "Contraseña débil"}
+
+              {nivelContrasena === 2 && "Contraseña regular"}
+
+              {nivelContrasena === 3 && "Contraseña buena"}
+
+              {nivelContrasena === 4 && "Contraseña segura"}
+            </Text>
+          </View>
+        )}
 
         <Campo
           titulo="CONFIRMAR CONTRASEÑA"
           placeholder="••••••••"
           valor={confirmar}
-          cambiarValor={
-            setConfirmar
-          }
+          cambiarValor={setConfirmar}
           esPassword={true}
           tipoTeclado="default"
         />
 
-        <MensajeValidacion
-          mostrar={
-            confirmar.length > 0
-          }
-          correcto={
-            contrasenasIguales
-          }
-          textoCorrecto="Las contraseñas coinciden"
-          textoError="Las contraseñas no coinciden"
-        />
-
-        <TouchableOpacity
-          style={
-            styles.boton
-          }
-          onPress={
-            crearCuenta
-          }
+        <HelperText
+          type={contrasenasIguales ? "info" : "error"}
+          visible={confirmar.length > 0}
+          style={styles.helper}
         >
-          <Text
-            style={
-              styles.textoBoton
-            }
-          >
-            CREAR CUENTA
-          </Text>
-        </TouchableOpacity>
+          {contrasenasIguales
+            ? "Las contraseñas coinciden"
+            : "Las contraseñas no coinciden"}
+        </HelperText>
 
-        {mensaje !== "" && (
-          <Text
-            style={
-              styles.mensaje
-            }
-          >
-            {mensaje}
-          </Text>
-        )}
-
-        <View
-          style={
-            styles.loginFila
-          }
+        <Button
+          mode="contained"
+          onPress={crearCuenta}
+          buttonColor={COLORES.boton}
+          textColor={COLORES.botonTexto}
+          style={styles.boton}
+          labelStyle={styles.textoBoton}
         >
-          <Text
-            style={
-              styles.textoCuenta
-            }
-          >
-            ¿YA TIENES CUENTA?
-          </Text>
+          CREAR CUENTA
+        </Button>
 
-          <TouchableOpacity
-            onPress={
-              irLogin
-            }
+        <View style={styles.loginFila}>
+          <Text style={styles.textoCuenta}>¿YA TIENES CUENTA?</Text>
+
+          <Button
+            mode="text"
+            onPress={() => navigation.navigate("Login")}
+            textColor={COLORES.doradoClaro}
+            labelStyle={styles.textoLogin}
           >
-            <Text
-              style={
-                styles.textoLogin
-              }
-            >
-              INICIA SESIÓN
-            </Text>
-          </TouchableOpacity>
+            INICIA SESIÓN
+          </Button>
         </View>
+
+        <Snackbar
+          visible={mensaje !== ""}
+          onDismiss={() => setMensaje("")}
+          duration={2500}
+          style={[
+            styles.snackbar,
+            {
+              backgroundColor:
+                tipoMensaje === "success" ? COLORES.correcto : COLORES.error,
+            },
+          ]}
+        >
+          <Text style={styles.textoSnackbar}>{mensaje}</Text>
+        </Snackbar>
       </View>
     </AuthLayout>
   );
@@ -384,31 +304,23 @@ const styles = StyleSheet.create({
 
     paddingHorizontal: 17,
 
-    paddingVertical: 15,
+    paddingVertical: 12,
 
-    backgroundColor:
-      COLORES.tarjeta,
+    backgroundColor: COLORES.tarjeta,
 
     borderWidth: 2,
 
-    borderColor:
-      COLORES.bordeTarjeta,
+    borderColor: COLORES.bordeTarjeta,
 
     borderRadius: 20,
 
-    flexDirection:
-      "column",
-
-    justifyContent:
-      "center",
+    justifyContent: "center",
   },
 
   titulo: {
-    color:
-      COLORES.crema,
+    color: COLORES.crema,
 
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
     fontWeight: "bold",
 
@@ -420,18 +332,15 @@ const styles = StyleSheet.create({
   },
 
   decoracion: {
-    flexDirection:
-      "row",
+    flexDirection: "row",
 
-    justifyContent:
-      "center",
+    justifyContent: "center",
 
-    alignItems:
-      "center",
+    alignItems: "center",
 
     marginTop: 5,
 
-    marginBottom: 7,
+    marginBottom: 6,
   },
 
   linea: {
@@ -439,8 +348,7 @@ const styles = StyleSheet.create({
 
     height: 1,
 
-    backgroundColor:
-      COLORES.dorado,
+    backgroundColor: COLORES.dorado,
   },
 
   diamante: {
@@ -452,8 +360,7 @@ const styles = StyleSheet.create({
 
     borderWidth: 1,
 
-    borderColor:
-      COLORES.dorado,
+    borderColor: COLORES.dorado,
 
     transform: [
       {
@@ -463,51 +370,75 @@ const styles = StyleSheet.create({
   },
 
   subtitulo: {
-    color:
-      COLORES.doradoClaro,
+    color: COLORES.doradoClaro,
 
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
-    fontSize: 6.7,
+    fontSize: 7,
 
     letterSpacing: 1.3,
 
     textAlign: "center",
 
-    marginBottom: 12,
+    marginBottom: 10,
+  },
+
+  nivel: {
+    width: "100%",
+
+    marginTop: -5,
+
+    marginBottom: 5,
+  },
+
+  progreso: {
+    height: 5,
+
+    borderRadius: 10,
+
+    backgroundColor: "rgba(255,255,255,0.15)",
+  },
+
+  textoNivel: {
+    color: COLORES.doradoClaro,
+
+    fontFamily: FUENTES.principal,
+
+    fontSize: 7,
+
+    marginTop: 3,
+  },
+
+  // MENSAJES DE VALIDACIÓN
+
+  helper: {
+    marginTop: -8,
+
+    marginBottom: 4,
+
+    paddingHorizontal: 0,
+
+    fontFamily: FUENTES.principal,
+
+    fontSize: 7,
+
+    lineHeight: 10,
   },
 
   boton: {
     width: "100%",
 
-    height: 46,
-
-    backgroundColor:
-      COLORES.boton,
-
-    borderWidth: 1,
-
-    borderColor:
-      COLORES.botonBorde,
+    height: 44,
 
     borderRadius: 10,
 
-    justifyContent:
-      "center",
+    justifyContent: "center",
 
-    alignItems:
-      "center",
-
-    marginTop: 2,
+    marginTop: 5,
   },
 
   textoBoton: {
-    color:
-      COLORES.botonTexto,
-
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
     fontWeight: "bold",
 
@@ -516,55 +447,43 @@ const styles = StyleSheet.create({
     letterSpacing: 1.3,
   },
 
-  mensaje: {
-    color:
-      COLORES.mensaje,
+  loginFila: {
+    flexDirection: "row",
 
-    fontFamily:
-      FUENTES.principal,
+    justifyContent: "center",
 
-    fontSize: 7,
-
-    textAlign:
-      "center",
+    alignItems: "center",
 
     marginTop: 8,
   },
 
-  loginFila: {
-    flexDirection:
-      "row",
-
-    justifyContent:
-      "center",
-
-    alignItems:
-      "center",
-
-    marginTop: 11,
-  },
-
   textoCuenta: {
-    color:
-      COLORES.textoSecundario,
+    color: COLORES.textoSecundario,
 
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
-    fontSize: 6.8,
+    fontSize: 7,
   },
 
   textoLogin: {
-    color:
-      COLORES.doradoClaro,
-
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
     fontWeight: "bold",
 
-    fontSize: 6.8,
+    fontSize: 7,
+  },
 
-    marginLeft: 5,
+  snackbar: {
+    borderRadius: 10,
+  },
+
+  textoSnackbar: {
+    color: COLORES.crema,
+
+    fontFamily: FUENTES.principal,
+
+    fontSize: 10,
+
+    fontWeight: "bold",
   },
 });

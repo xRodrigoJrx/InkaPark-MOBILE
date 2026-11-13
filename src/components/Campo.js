@@ -1,44 +1,49 @@
 import React from "react";
 
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import {
-  COLORES,
-  FUENTES,
-} from "../../styles/paleta";
+import { Text, TextInput } from "react-native-paper";
+
+import { COLORES, FUENTES } from "../styles/paleta";
 
 export default function Campo({
   titulo,
+
   placeholder,
+
   valor,
+
   cambiarValor,
+
   esPassword,
+
   tipoTeclado,
+
   maxLength,
 }) {
   return (
     <View style={styles.campo}>
-      <Text style={styles.label}>
-        {titulo}
-      </Text>
+      <Text style={styles.label}>{titulo}</Text>
 
       <TextInput
-        style={styles.input}
+        mode="outlined"
         placeholder={placeholder}
-        placeholderTextColor={
-          COLORES.placeholder
-        }
         value={valor}
         onChangeText={cambiarValor}
         secureTextEntry={esPassword}
         keyboardType={tipoTeclado}
         autoCapitalize="none"
         maxLength={maxLength}
+        placeholderTextColor={COLORES.placeholder}
+        textColor={COLORES.crema}
+        outlineColor={COLORES.bordeInput}
+        activeOutlineColor={COLORES.dorado}
+        style={styles.input}
+        theme={{
+          colors: {
+            background: COLORES.input,
+          },
+        }}
       />
     </View>
   );
@@ -47,15 +52,14 @@ export default function Campo({
 const styles = StyleSheet.create({
   campo: {
     width: "100%",
+
     marginBottom: 13,
   },
 
   label: {
-    color:
-      COLORES.textoSecundario,
+    color: COLORES.textoSecundario,
 
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
     fontSize: 7.5,
 
@@ -69,23 +73,11 @@ const styles = StyleSheet.create({
 
     height: 45,
 
-    paddingHorizontal: 13,
-
-    borderWidth: 1.5,
-
-    borderColor:
-      COLORES.bordeInput,
+    backgroundColor: COLORES.input,
 
     borderRadius: 10,
 
-    backgroundColor:
-      COLORES.input,
-
-    color:
-      COLORES.crema,
-
-    fontFamily:
-      FUENTES.principal,
+    fontFamily: FUENTES.principal,
 
     fontSize: 10,
   },

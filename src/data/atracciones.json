@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "nombre": "MONTAÑA INCA",
+    "descripcion": "Aventura y naturaleza",
+    "categoria": "Aventura",
+    "intensidad": "Intensidad alta",
+    "duracion": "5 min",
+    "horario": "10:00 - 20:00",
+    "alturaMin": "1.40 m",
+    "descripcionCorta": "Aventura · Intensidad alta",
+    "descripcionLarga": "Una experiencia inspirada en los caminos del antiguo imperio, con velocidad, altura y una vista privilegiada del parque.",
+    "recomendaciones": [
+      "Mantén tus pertenencias aseguradas.",
+      "Sigue las indicaciones del personal.",
+      "No recomendado para personas con vértigo."
+    ],
+    "color": "#8B5E3C"
+  },
+  {
+    "id": 2,
+    "nombre": "SHOW CULTURAL",
+    "descripcion": "Cultura y tradición",
+    "categoria": "Cultura",
+    "intensidad": "Familiar",
+    "duracion": "12 min",
+    "horario": "10:00 - 20:00",
+    "alturaMin": "Todas",
+    "descripcionCorta": "Cultura · Familiar",
+    "descripcionLarga": "Recorre el templo ceremonial más importante del parque y vive un espectáculo de luz, música y danza ancestral.",
+    "recomendaciones": [
+      "Ideal para toda la familia.",
+      "Permitido tomar fotos sin flash.",
+      "No se permite ingresar con alimentos."
+    ],
+    "color": "#D9AD38"
+  },
+  {
+    "id": 3,
+    "nombre": "RÍO SAGRADO",
+    "descripcion": "Naturaleza y diversión",
+    "categoria": "Naturaleza",
+    "intensidad": "Intensidad media",
+    "duracion": "8 min",
+    "horario": "10:00 - 20:00",
+    "alturaMin": "1.20 m",
+    "descripcionCorta": "Naturaleza · Intensidad media",
+    "descripcionLarga": "Navega por aguas cristalinas entre la selva alta y descubre la flora y fauna que inspiraron a los antiguos peruanos.",
+    "recomendaciones": [
+      "Lleva protector solar.",
+      "Se recomienda ropa cómoda.",
+      "Apto para toda la familia."
+    ],
+    "color": "#2E7D32"
+  },
+  {
+    "id": 4,
+    "nombre": "COLISEO ANDINO",
+    "descripcion": "Aventura y emoción",
+    "categoria": "Aventura",
+    "intensidad": "Intensidad alta",
+    "duracion": "10 min",
+    "horario": "11:00 - 19:00",
+    "alturaMin": "1.30 m",
+    "descripcionCorta": "Aventura · Intensidad alta",
+    "descripcionLarga": "Un espectáculo de acrobacias y danzas aéreas en el corazón del coliseo. Velocidad y emoción para los más intrépidos.",
+    "recomendaciones": [
+      "No apto para personas con problemas cardíacos.",
+      "Mantén la distancia de seguridad.",
+      "Sigue al personal en todo momento."
+    ],
+    "color": "#B71C1C"
+  },
+  {
+    "id": 5,
+    "nombre": "MERCADO ANDINO",
+    "descripcion": "Gastronomía y artesanía",
+    "categoria": "Cultura",
+    "intensidad": "Familiar",
+    "duracion": "Libre",
+    "horario": "10:00 - 21:00",
+    "alturaMin": "Todas",
+    "descripcionCorta": "Cultura · Familiar",
+    "descripcionLarga": "Un recorrido por la gastronomía, artesanía y tradiciones del Perú profundo. Ideal para toda la familia.",
+    "recomendaciones": [
+      "Apto para todas las edades.",
+      "Acepta pagos con tarjeta.",
+      "Zona pet friendly."
+    ],
+    "color": "#8B5E3C"
+  }
+]

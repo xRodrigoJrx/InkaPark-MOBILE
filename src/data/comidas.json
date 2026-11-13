@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "nombre": "LOMO SALTADO",
+    "categoria": "Plato principal",
+    "precio": "S/ 32",
+    "porcion": "1 persona",
+    "tiempoPrep": "15 min",
+    "picante": false,
+    "vegetariano": false,
+    "descripcion": "Salteado de lomo fino con papas y arroz.",
+    "descripcionLarga": "El clásico peruano: lomo fino salteado al wok con cebolla, tomate, papas fritas y arroz blanco. Acompañado de salsa criolla.",
+    "color": "#B71C1C"
+  },
+  {
+    "id": 2,
+    "nombre": "AJÍ DE GALLINA",
+    "categoria": "Plato principal",
+    "precio": "S/ 28",
+    "porcion": "1 persona",
+    "tiempoPrep": "12 min",
+    "picante": true,
+    "vegetariano": false,
+    "descripcion": "Pollo desmenuzado en salsa de ají amarillo.",
+    "descripcionLarga": "Pechuga de pollo desmenuzada en una cremosa salsa de ají amarillo, acompañada de papas sancochadas, arroz y huevo duro.",
+    "color": "#E65100"
+  },
+  {
+    "id": 3,
+    "nombre": "CAUSA LIMEÑA",
+    "categoria": "Entrada",
+    "precio": "S/ 22",
+    "porcion": "1 persona",
+    "tiempoPrep": "10 min",
+    "picante": true,
+    "vegetariano": false,
+    "descripcion": "Papa amarilla con ají, limón y relleno de pollo.",
+    "descripcionLarga": "Capas de papa amarilla sazonada con ají amarillo y limón, rellenas de pollo desmenuzado y mayonesa. Decorada con aceitunas y huevo.",
+    "color": "#F9A825"
+  },
+  {
+    "id": 4,
+    "nombre": "CHICHA MORADA",
+    "categoria": "Bebida",
+    "precio": "S/ 10",
+    "porcion": "Vaso 400ml",
+    "tiempoPrep": "3 min",
+    "picante": false,
+    "vegetariano": true,
+    "descripcion": "Refresco tradicional de maíz morado y frutas.",
+    "descripcionLarga": "Bebida tradicional andina preparada con maíz morado, piña, canela y clavo. Servida bien fría con limón.",
+    "color": "#6A1B9A"
+  },
+  {
+    "id": 5,
+    "nombre": "PICARONES",
+    "categoria": "Postre",
+    "precio": "S/ 14",
+    "porcion": "3 unidades",
+    "tiempoPrep": "5 min",
+    "picante": false,
+    "vegetariano": true,
+    "descripcion": "Buñuelos de zapallo con miel de chancaca.",
+    "descripcionLarga": "Deliciosos buñuelos de zapallo fritos y bañados en miel de chancaca con aroma a canela. Un clásico dulce peruano.",
+    "color": "#8B5E3C"
+  },
+  {
+    "id": 6,
+    "nombre": "ANTICUCHOS",
+    "categoria": "Plato principal",
+    "precio": "S/ 30",
+    "porcion": "2 palitos",
+    "tiempoPrep": "20 min",
+    "picante": true,
+    "vegetariano": false,
+    "descripcion": "Brochetas de corazón de res a la parrilla.",
+    "descripcionLarga": "Trozos de corazón de res marinados en ají panca y especias, asados a la parrilla y servidos con papa dorada y choclo.",
+    "color": "#B71C1C"
+  }
+]

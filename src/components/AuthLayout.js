@@ -3,78 +3,63 @@ import React from "react";
 import {
   Image,
   ImageBackground,
-  StatusBar,
   StyleSheet,
   View,
+  useWindowDimensions,
 } from "react-native";
 
-import {
-  COLORES,
-} from "../../styles/paleta";
+import { StatusBar } from "expo-status-bar";
 
-export default function AuthLayout({
-  children,
-}) {
+import { COLORES } from "../styles/paleta";
+
+export default function AuthLayout({ children }) {
+  const { width } = useWindowDimensions();
+
+  const esTablet = width > 700;
+
   return (
     <View style={styles.contenedor}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={
-          COLORES.fondo
-        }
-      />
+      <StatusBar style="light" />
 
       <View style={styles.pantalla}>
-        <View
-          style={[
-            styles.zonaPilar,
-            styles.zonaIzquierda,
-          ]}
-        >
+        {/* PILAR IZQUIERDO */}
+
+        <View style={[styles.zonaPilar, styles.zonaIzquierda]}>
           <Image
-            source={require(
-              "../../assets/Pilar1.png"
-            )}
-            style={
-              styles.pilarIzquierdo
-            }
+            source={require("../../assets/Pilar1.png")}
+            style={[
+              styles.pilarIzquierdo,
+              {
+                width: esTablet ? "190%" : "250%",
+              },
+            ]}
             resizeMode="stretch"
           />
         </View>
 
+        {/* ZONA CENTRAL */}
+
         <View style={styles.centro}>
           <ImageBackground
-            source={require(
-              "../../assets/medio.png"
-            )}
+            source={require("../../assets/medio.png")}
             resizeMode="cover"
-            style={
-              styles.imagenFondo
-            }
+            style={styles.imagenFondo}
           >
-            <View
-              style={
-                styles.capaOscura
-              }
-            >
-              {children}
-            </View>
+            <View style={styles.capaOscura}>{children}</View>
           </ImageBackground>
         </View>
 
-        <View
-          style={[
-            styles.zonaPilar,
-            styles.zonaDerecha,
-          ]}
-        >
+        {/* PILAR DERECHO */}
+
+        <View style={[styles.zonaPilar, styles.zonaDerecha]}>
           <Image
-            source={require(
-              "../../assets/Pilar2.png"
-            )}
-            style={
-              styles.pilarDerecho
-            }
+            source={require("../../assets/Pilar2.png")}
+            style={[
+              styles.pilarDerecho,
+              {
+                width: esTablet ? "190%" : "250%",
+              },
+            ]}
             resizeMode="stretch"
           />
         </View>
@@ -87,8 +72,7 @@ const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
 
-    backgroundColor:
-      COLORES.fondo,
+    backgroundColor: COLORES.fondo,
   },
 
   pantalla: {
@@ -102,46 +86,35 @@ const styles = StyleSheet.create({
 
     overflow: "hidden",
 
-    backgroundColor:
-      COLORES.pilar,
+    backgroundColor: COLORES.pilar,
 
-    justifyContent:
-      "center",
+    justifyContent: "center",
   },
 
   zonaIzquierda: {
-    alignItems:
-      "flex-start",
+    alignItems: "flex-start",
   },
 
   zonaDerecha: {
-    alignItems:
-      "flex-end",
+    alignItems: "flex-end",
   },
 
   pilarIzquierdo: {
     flex: 1,
 
-    width: "190%",
-
-    alignSelf:
-      "flex-start",
+    alignSelf: "flex-start",
   },
 
   pilarDerecho: {
     flex: 1,
 
-    width: "190%",
-
-    alignSelf:
-      "flex-end",
+    alignSelf: "flex-end",
   },
 
   centro: {
     flex: 7.6,
 
-    backgroundColor:
-      COLORES.centro,
+    backgroundColor: COLORES.centro,
   },
 
   imagenFondo: {
@@ -151,14 +124,11 @@ const styles = StyleSheet.create({
   capaOscura: {
     flex: 1,
 
-    backgroundColor:
-      COLORES.capaOscura,
+    backgroundColor: COLORES.capaOscura,
 
-    justifyContent:
-      "center",
+    justifyContent: "center",
 
-    alignItems:
-      "center",
+    alignItems: "center",
 
     paddingHorizontal: 5,
   },
