@@ -1,5 +1,3 @@
-// src/context/AuthContext.js
-
 import React, {
   createContext,
   useContext,
@@ -21,90 +19,132 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
-import { auth, db } from "../config/firebase";
-import { crearPerfilSiFalta } from "../services/usuariosService";
-import { mensajeAuth } from "../utils/authErrors";
+import {
+  auth,
+  db,
+} from "../config/firebase";
 
-const AuthContext = createContext(null);
+import { crearPerfilSiFalta } from
+  "../services/usuariosService";
 
-export function AuthProvider({ children }) {
-  const [cuenta, setCuenta] = useState(null);
-  const [usuario, setUsuario] = useState(null);
+import { suspenderAvisos } from
+  "../services/notificacionesService";
 
-  const [cargandoAuth, setCargandoAuth] = useState(true);
-  const [cargandoPerfil, setCargandoPerfil] = useState(false);
+import { mensajeAuth } from
+  "../utils/authErrors";
 
-  const [errorPerfil, setErrorPerfil] = useState("");
-  const [errorSesion, setErrorSesion] = useState("");
+const AuthContext =
+  createContext(null);
 
-  const [registrando, setRegistrando] = useState(false);
-  const [datosPendientes, setDatosPendientes] = useState(null);
-  const [avisoPerfil, setAvisoPerfil] = useState("");
+export function AuthProvider({
+  children,
+}) {
+  const [cuenta, setCuenta] =
+    useState(null);
 
-  const [intentoPerfil, setIntentoPerfil] = useState(0);
-  const [intentoAuth, setIntentoAuth] = useState(0);
+  const [usuario, setUsuario] =
+    useState(null);
 
-  const registroEnCurso = useRef(false);
+  const [cargandoAuth, setCargandoAuth] =
+    useState(true);
 
-  // Firebase restaura la sesión guardada y notifica los cambios.
+  const [
+    cargandoPerfil,
+    setCargandoPerfil,
+  ] = useState(false);
+
+  const [errorPerfil, setErrorPerfil] =
+    useState("");
+
+  const [errorSesion, setErrorSesion] =
+    useState("");
+
+  const [registrando, setRegistrando] =
+    useState(false);
+
+  const [
+    datosPendientes,
+    setDatosPendientes,
+  ] = useState(null);
+
+  const [avisoPerfil, setAvisoPerfil] =
+    useState("");
+
+  const [intentoPerfil, setIntentoPerfil] =
+    useState(0);
+
+  const [intentoAuth, setIntentoAuth] =
+    useState(0);
+
+  const registroEnCurso =
+    useRef(false);
+
   useEffect(() => {
     setCargandoAuth(true);
     setErrorSesion("");
 
-    const cancelar = onAuthStateChanged(
-      auth,
-      (actual) => {
-        // Anonymous no se considera una sesión definitiva.
-        const definitiva =
-          actual && !actual.isAnonymous ? actual : null;
+    const cancelar =
+      onAuthStateChanged(
+        auth,
+        (actual) => {
+          const definitiva =
+            actual && !actual.isAnonymous
+              ? actual
+              : null;
 
-        setCuenta(definitiva);
-        setUsuario(null);
-        setErrorPerfil("");
-        setCargandoPerfil(Boolean(definitiva));
-        setCargandoAuth(false);
+          setCuenta(definitiva);
+          setUsuario(null);
+          setErrorPerfil("");
 
-        if (!definitiva && !registroEnCurso.current) {
-          setDatosPendientes(null);
-          setAvisoPerfil("");
+          setCargandoPerfil(
+            Boolean(definitiva)
+          );
+
+          setCargandoAuth(false);
+
+          if (
+            !definitiva &&
+            !registroEnCurso.current
+          ) {
+            setDatosPendientes(null);
+            setAvisoPerfil("");
+          }
+        },
+        () => {
+          setCuenta(null);
+          setUsuario(null);
+          setCargandoAuth(false);
+          setCargandoPerfil(false);
+
+          setErrorSesion(
+            "No se pudo restaurar la sesión. Intenta nuevamente."
+          );
         }
-      },
-      () => {
-        setCuenta(null);
-        setUsuario(null);
-        setCargandoAuth(false);
-        setCargandoPerfil(false);
-
-        setErrorSesion(
-          "No se pudo restaurar la sesión. Intenta nuevamente."
-        );
-      }
-    );
+      );
 
     return cancelar;
   }, [intentoAuth]);
 
   const uid = cuenta?.uid;
 
-  // Escucha únicamente el perfil del usuario autenticado.
   useEffect(() => {
-    if (!uid) {
-      return;
-    }
+    if (!uid) return;
 
     let activo = true;
 
     setCargandoPerfil(true);
     setErrorPerfil("");
 
-    const referencia = doc(db, "usuarios", uid);
+    const referencia = doc(
+      db,
+      "usuarios",
+      uid
+    );
 
     const cancelar = onSnapshot(
       referencia,
       (documento) => {
-        if (!activo) {
-          return;
-        }
+        if (!activo) return;
 
         setUsuario(
           documento.exists()
@@ -119,12 +159,14 @@ export function AuthProvider({ children }) {
         setCargandoPerfil(false);
       },
       (error) => {
-        if (!activo) {
-          return;
-        }
+        if (!activo) return;
 
         setUsuario(null);
-        setErrorPerfil(mensajeAuth(error));
+
+        setErrorPerfil(
+          mensajeAuth(error)
+        );
+
         setCargandoPerfil(false);
       }
     );
@@ -163,21 +205,20 @@ export function AuthProvider({ children }) {
           contrasena
         );
 
-      // Crear la cuenta también inicia sesión en Firebase.
-      // La contraseña nunca se envía al servicio de perfiles.
       try {
-        await crearPerfilSiFalta(credencial.user, {
-          nombre,
-          telefono,
-        });
+        await crearPerfilSiFalta(
+          credencial.user,
+          {
+            nombre,
+            telefono,
+          }
+        );
 
         setDatosPendientes(null);
       } catch (error) {
-        // La cuenta ya existe aunque falle Firestore.
-        // AppStack mostrará la recuperación del perfil pendiente.
         setAvisoPerfil(
           "Tu cuenta ya fue creada. Falta guardar el perfil: " +
-            mensajeAuth(error)
+          mensajeAuth(error)
         );
       }
     } catch (error) {
@@ -189,7 +230,10 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function ingresar(correo, contrasena) {
+  async function ingresar(
+    correo,
+    contrasena
+  ) {
     setDatosPendientes(null);
     setAvisoPerfil("");
 
@@ -207,15 +251,18 @@ export function AuthProvider({ children }) {
         correo.trim().toLowerCase()
       );
     } catch (error) {
-      // Mantener una respuesta neutral para correos inexistentes.
-      if (error.code !== "auth/user-not-found") {
+      if (
+        error.code !==
+        "auth/user-not-found"
+      ) {
         throw error;
       }
     }
   }
 
   async function completarPerfil(datos) {
-    const actual = auth.currentUser;
+    const actual =
+      auth.currentUser;
 
     if (
       !actual ||
@@ -227,14 +274,40 @@ export function AuthProvider({ children }) {
       );
     }
 
-    await crearPerfilSiFalta(actual, datos);
+    await crearPerfilSiFalta(
+      actual,
+      datos
+    );
 
     setDatosPendientes(null);
     setAvisoPerfil("");
-    setIntentoPerfil((valor) => valor + 1);
+
+    setIntentoPerfil(
+      (valor) => valor + 1
+    );
   }
 
   async function salir() {
+    const uidActual =
+      auth.currentUser?.uid;
+
+    if (uidActual) {
+      try {
+        await suspenderAvisos(
+          uidActual
+        );
+      } catch {
+        const error = new Error(
+          "No pudimos pausar tus recordatorios. Intenta cerrar sesión nuevamente."
+        );
+
+        error.code =
+          "notifications/pause-failed";
+
+        throw error;
+      }
+    }
+
     await signOut(auth);
 
     setUsuario(null);
@@ -243,11 +316,15 @@ export function AuthProvider({ children }) {
   }
 
   function reintentarPerfil() {
-    setIntentoPerfil((valor) => valor + 1);
+    setIntentoPerfil(
+      (valor) => valor + 1
+    );
   }
 
   function reintentarSesion() {
-    setIntentoAuth((valor) => valor + 1);
+    setIntentoAuth(
+      (valor) => valor + 1
+    );
   }
 
   return (
@@ -277,10 +354,13 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  const contexto = useContext(AuthContext);
+  const contexto =
+    useContext(AuthContext);
 
   if (!contexto) {
-    throw new Error("useAuth necesita AuthProvider.");
+    throw new Error(
+      "useAuth necesita AuthProvider."
+    );
   }
 
   return contexto;

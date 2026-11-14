@@ -1,6 +1,7 @@
-// screens/Perfil.js
-
-import React, { useRef, useState } from "react";
+import React, {
+  useRef,
+  useState,
+} from "react";
 
 import {
   ActivityIndicator,
@@ -19,238 +20,353 @@ import {
   Text,
 } from "react-native-paper";
 
-import { COLORES, FUENTES } from "../src/styles/paleta";
-import { useAuth } from "../src/context/AuthContext";
-import { mensajeAuth } from "../src/utils/authErrors";
+import { useSafeAreaInsets } from
+  "react-native-safe-area-context";
 
-function OpcionPerfil({ icono, titulo, descripcion }) {
+import {
+  COLORES as C,
+  FUENTES,
+} from "../src/styles/paleta";
+
+import { useAuth } from
+  "../src/context/AuthContext";
+
+import { mensajeAuth } from
+  "../src/utils/authErrors";
+
+function OpcionPerfil({
+  icono,
+  titulo,
+  descripcion,
+  onPress,
+}) {
   return (
-    <Card mode="outlined" style={styles.opcion}>
-      <View style={styles.opcionContenido}>
-        <View style={styles.iconoOpcion}>
+    <Card
+      mode="outlined"
+      style={s.opcion}
+      onPress={onPress}
+    >
+      <View style={s.opcionContenido}>
+        <View style={s.iconoOpcion}>
           <Icon
             source={icono}
-            size={22}
-            color={COLORES.dorado}
+            size={24}
+            color={C.dorado}
           />
         </View>
 
-        <View style={styles.textosOpcion}>
-          <Text style={styles.tituloOpcion}>
+        <View style={s.flex}>
+          <Text style={s.tituloOpcion}>
             {titulo}
           </Text>
 
-          <Text style={styles.descripcionOpcion}>
+          <Text style={s.descripcion}>
             {descripcion}
           </Text>
         </View>
 
         <Icon
-          source="chevron-right"
+          source={
+            onPress
+              ? "chevron-right"
+              : "lock-outline"
+          }
           size={22}
-          color={COLORES.doradoClaro}
+          color={C.textoSecundario}
         />
       </View>
     </Card>
   );
 }
 
-export default function Perfil() {
+export default function Perfil({
+  navigation,
+}) {
   const { usuario, salir } = useAuth();
+  const insets = useSafeAreaInsets();
 
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [cerrandoSesion, setCerrandoSesion] = useState(false);
-  const [errorSalida, setErrorSalida] = useState("");
+  const [mostrarModal, setMostrarModal] =
+    useState(false);
+
+  const [cerrando, setCerrando] =
+    useState(false);
+
+  const [error, setError] = useState("");
+  const [ayuda, setAyuda] = useState(false);
 
   const salidaEnCurso = useRef(false);
 
   async function cerrarSesion() {
-    if (salidaEnCurso.current) {
-      return;
-    }
+    if (salidaEnCurso.current) return;
 
     salidaEnCurso.current = true;
     setMostrarModal(false);
-    setErrorSalida("");
-    setCerrandoSesion(true);
+    setError("");
+    setCerrando(true);
 
     try {
       await salir();
-
-      // AppStack volverá automáticamente al Login.
-    } catch (error) {
-      setErrorSalida(mensajeAuth(error));
+    } catch (e) {
+      setError(
+        e.code === "notifications/pause-failed"
+          ? e.message
+          : mensajeAuth(e)
+      );
     } finally {
       salidaEnCurso.current = false;
-      setCerrandoSesion(false);
+      setCerrando(false);
     }
   }
 
-  if (cerrandoSesion) {
+  if (cerrando) {
     return (
-      <View style={styles.pantallaCarga}>
-        <Text style={styles.logoCarga}>
-          INKAPARK
-        </Text>
-
+      <View style={s.centro}>
         <ActivityIndicator
           size="large"
-          color={COLORES.dorado}
-          style={styles.loader}
+          color={C.dorado}
         />
 
-        <Text style={styles.textoCarga}>
-          Cerrando sesión...
+        <Text style={s.texto}>
+          Cerrando sesión…
         </Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.contenedor}>
+    <View style={s.pantalla}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[
+          s.contenido,
+          {
+            paddingTop: Math.max(
+              insets.top,
+              18
+            ),
+          },
+        ]}
       >
-        {/* HEADER */}
-        <View style={styles.header}>
-          <View style={styles.headerContenido}>
-            <Image
-              source={require("../assets/logo.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
+        <View style={s.header}>
+          <Image
+            source={require("../assets/logo.png")}
+            style={s.logo}
+            resizeMode="contain"
+          />
 
-            <View>
-              <Text style={styles.tituloHeader}>
-                INKAPARK
-              </Text>
+          <View style={s.flex}>
+            <Text style={s.marca}>
+              INKAPARK
+            </Text>
 
-              <Text style={styles.subtituloHeader}>
-                AVENTURA, CULTURA Y NATURALEZA
-              </Text>
-            </View>
+            <Text style={s.descripcion}>
+              AVENTURA, CULTURA Y NATURALEZA
+            </Text>
           </View>
         </View>
 
-        <Text style={styles.tituloSeccion}>
-          MI PERFIL
+        <Text style={s.titulo}>
+          Mi perfil
         </Text>
 
-        <Text style={styles.subtituloSeccion}>
-          Administra tu cuenta y preferencias.
-        </Text>
-
-        {/* DATOS DEL USUARIO */}
-        <Card
-          style={styles.tarjetaUsuario}
-          mode="outlined"
-        >
-          <View style={styles.usuarioContenido}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarTexto}>
-                {usuario?.nombre
-                  ? usuario.nombre.substring(0, 2).toUpperCase()
-                  : "IK"}
-              </Text>
-            </View>
-
-            <View style={styles.infoUsuario}>
-              <Text style={styles.nombreUsuario}>
-                {usuario?.nombre || "Usuario"}
-              </Text>
-
-              <Text style={styles.correoUsuario}>
-                {usuario?.correo || ""}
-              </Text>
-            </View>
+        <View style={s.tarjetaUsuario}>
+          <View style={s.avatar}>
+            <Text style={s.avatarTexto}>
+              {usuario?.nombre
+                ? usuario.nombre
+                    .substring(0, 2)
+                    .toUpperCase()
+                : "IK"}
+            </Text>
           </View>
-        </Card>
 
-        {/* OPCIONES VISUALES EXISTENTES */}
-        <Text style={styles.tituloSeccion}>
-          OPCIONES
-        </Text>
+          <View style={s.flex}>
+            <Text style={s.nombre}>
+              {usuario?.nombre || "Usuario"}
+            </Text>
 
-        <View style={styles.listaOpciones}>
-          <OpcionPerfil
-            icono="ticket-confirmation-outline"
-            titulo="Mis entradas"
-            descripcion="Accesos y códigos QR"
-          />
+            <Text style={s.texto}>
+              {usuario?.correo || ""}
+            </Text>
 
-          <OpcionPerfil
-            icono="heart-outline"
-            titulo="Favoritos"
-            descripcion="Atracciones guardadas"
-          />
-
-          <OpcionPerfil
-            icono="bell-outline"
-            titulo="Notificaciones"
-            descripcion="Alertas y horarios"
-          />
-
-          <OpcionPerfil
-            icono="help-circle-outline"
-            titulo="Ayuda"
-            descripcion="Preguntas frecuentes"
-          />
-
-          <OpcionPerfil
-            icono="cog-outline"
-            titulo="Configuración"
-            descripcion="Preferencias de la app"
-          />
+            {!!usuario?.telefono && (
+              <Text style={s.descripcion}>
+                {usuario.telefono}
+              </Text>
+            )}
+          </View>
         </View>
 
-        {errorSalida !== "" && (
-          <Text style={styles.error}>
-            {errorSalida}
+        <Text style={s.seccion}>
+          TU AVENTURA
+        </Text>
+
+        <OpcionPerfil
+          icono="ticket-confirmation-outline"
+          titulo="Mis entradas"
+          descripcion="Boletos, códigos QR e impresión"
+          onPress={() =>
+            navigation.navigate("Entradas")
+          }
+        />
+
+        <OpcionPerfil
+          icono="shoe-print"
+          titulo="Camina y gana"
+          descripcion="Tu misión y tienda de puntos"
+          onPress={() =>
+            navigation.navigate(
+              "Camina",
+              {
+                screen: "MisionCamina",
+              }
+            )
+          }
+        />
+
+        <OpcionPerfil
+          icono="ticket-percent-outline"
+          titulo="Mis cupones"
+          descripcion="Códigos disponibles y utilizados"
+          onPress={() =>
+            navigation.navigate(
+              "Camina",
+              {
+                screen: "MisCupones",
+              }
+            )
+          }
+        />
+
+        <Text style={s.seccion}>
+          MÁS OPCIONES
+        </Text>
+
+        <OpcionPerfil
+          icono="heart-outline"
+          titulo="Favoritos"
+          descripcion="Próximamente"
+        />
+
+        <OpcionPerfil
+          icono="bell-outline"
+          titulo="Notificaciones"
+          descripcion="Visitas, espectáculos e hidratación"
+          onPress={() =>
+            navigation.navigate(
+              "Notificaciones"
+            )
+          }
+        />
+
+        <OpcionPerfil
+          icono="cog-outline"
+          titulo="Configuración"
+          descripcion="Próximamente"
+        />
+
+        <OpcionPerfil
+          icono="help-circle-outline"
+          titulo="Ayuda"
+          descripcion="Cómo funcionan boletos y recompensas"
+          onPress={() =>
+            setAyuda(true)
+          }
+        />
+
+        {!!error && (
+          <Text
+            accessibilityRole="alert"
+            style={s.error}
+          >
+            {error}
           </Text>
         )}
 
         <Button
           mode="outlined"
-          textColor={COLORES.doradoClaro}
-          style={styles.botonCerrar}
-          labelStyle={styles.textoCerrar}
-          onPress={() => setMostrarModal(true)}
+          icon="logout"
+          textColor={C.doradoClaro}
+          style={s.salir}
+          onPress={() =>
+            setMostrarModal(true)
+          }
         >
-          CERRAR SESIÓN
+          Cerrar sesión
         </Button>
       </ScrollView>
 
-      {/* CONFIRMACIÓN DE CIERRE */}
       <Portal>
         <Dialog
           visible={mostrarModal}
-          onDismiss={() => setMostrarModal(false)}
-          style={styles.modal}
+          onDismiss={() =>
+            setMostrarModal(false)
+          }
+          style={s.dialogo}
         >
-          <Dialog.Title style={styles.tituloModal}>
+          <Dialog.Title>
             Cerrar sesión
           </Dialog.Title>
 
           <Dialog.Content>
-            <Text style={styles.textoModal}>
-              ¿Está seguro que desea cerrar sesión?
+            <Text style={s.texto}>
+              ¿Quieres salir de tu cuenta?
+              Tus compras, premios y cupones
+              seguirán en ella. Los recordatorios
+              de este teléfono quedarán pausados.
             </Text>
           </Dialog.Content>
 
           <Dialog.Actions>
             <Button
-              textColor={COLORES.textoSecundario}
-              onPress={() => setMostrarModal(false)}
+              onPress={() =>
+                setMostrarModal(false)
+              }
             >
-              CANCELAR
+              Cancelar
             </Button>
 
+            <Button onPress={cerrarSesion}>
+              Salir
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog
+          visible={ayuda}
+          onDismiss={() =>
+            setAyuda(false)
+          }
+          style={s.dialogo}
+        >
+          <Dialog.Title>
+            Tu aventura en InkaPark
+          </Dialog.Title>
+
+          <Dialog.Content>
+            <Text style={s.texto}>
+              • Los boletos permiten un ingreso
+              en la fecha indicada.
+              {"\n\n"}
+              • Camina 325 metros válidos para
+              obtener hasta 325 puntos.
+              {"\n\n"}
+              • Canjea cada recompensa una sola vez.
+              {"\n\n"}
+              • El cupón se consume al confirmar
+              una compra, no al introducir su código.
+              {"\n\n"}
+              • Los pagos son demostrativos.
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Actions>
             <Button
-              textColor={COLORES.dorado}
-              onPress={cerrarSesion}
+              onPress={() =>
+                setAyuda(false)
+              }
             >
-              SALIR
+              Entendido
             </Button>
           </Dialog.Actions>
         </Dialog>
@@ -259,222 +375,152 @@ export default function Perfil() {
   );
 }
 
-const styles = StyleSheet.create({
-  contenedor: {
+const s = StyleSheet.create({
+  pantalla: {
     flex: 1,
-    backgroundColor: COLORES.fondo,
+    backgroundColor: C.fondo,
   },
 
-  scroll: {
-    paddingHorizontal: 15,
+  contenido: {
+    paddingHorizontal: 18,
     paddingBottom: 40,
+    gap: 13,
+  },
+
+  flex: {
+    flex: 1,
   },
 
   header: {
-    marginTop: 20,
-    marginBottom: 15,
-  },
-
-  headerContenido: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
+    paddingBottom: 8,
   },
 
   logo: {
-    width: 55,
+    width: 59,
     height: 55,
-    marginRight: 10,
   },
 
-  tituloHeader: {
-    color: COLORES.crema,
+  marca: {
+    color: C.crema,
     fontFamily: FUENTES.principal,
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 21,
     letterSpacing: 2,
   },
 
-  subtituloHeader: {
-    color: COLORES.doradoClaro,
-    fontFamily: FUENTES.principal,
-    fontSize: 7,
-    letterSpacing: 1,
-  },
-
-  tituloSeccion: {
-    color: COLORES.crema,
+  titulo: {
+    color: C.crema,
     fontFamily: FUENTES.principal,
     fontWeight: "bold",
-    fontSize: 16,
-    letterSpacing: 1.5,
-    marginVertical: 12,
+    fontSize: 29,
   },
 
-  subtituloSeccion: {
-    color: COLORES.doradoClaro,
-    fontFamily: FUENTES.principal,
+  seccion: {
+    color: C.doradoClaro,
     fontSize: 11,
-    letterSpacing: 0.5,
-    marginBottom: 15,
+    letterSpacing: 1.4,
+    fontWeight: "bold",
+    marginTop: 13,
   },
 
   tarjetaUsuario: {
-    backgroundColor: COLORES.tarjeta,
-    borderColor: COLORES.bordeTarjeta,
-    borderRadius: 20,
-    marginBottom: 20,
-  },
-
-  usuarioContenido: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    gap: 15,
+    padding: 19,
+    borderWidth: 1,
+    borderColor: C.bordeTarjeta,
+    borderRadius: 21,
+    backgroundColor: "#2D1C0E",
   },
 
   avatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: COLORES.dorado,
-    justifyContent: "center",
+    backgroundColor: C.dorado,
     alignItems: "center",
-    marginRight: 16,
+    justifyContent: "center",
   },
 
   avatarTexto: {
-    color: COLORES.fondo,
-    fontFamily: FUENTES.principal,
-    fontSize: 20,
+    color: C.fondo,
     fontWeight: "bold",
+    fontSize: 22,
   },
 
-  infoUsuario: {
-    flex: 1,
-  },
-
-  nombreUsuario: {
-    color: COLORES.crema,
-    fontFamily: FUENTES.principal,
-    fontSize: 16,
+  nombre: {
+    color: C.crema,
+    fontSize: 18,
     fontWeight: "bold",
-    letterSpacing: 0.5,
+    marginBottom: 5,
   },
 
-  correoUsuario: {
-    color: COLORES.textoSecundario,
-    fontFamily: FUENTES.principal,
-    fontSize: 12,
+  texto: {
+    color: C.textoSecundario,
+    fontSize: 13,
+    lineHeight: 21,
+  },
+
+  descripcion: {
+    color: C.textoSecundario,
+    fontSize: 11,
+    lineHeight: 18,
     marginTop: 4,
   },
 
-  listaOpciones: {
-    marginBottom: 10,
-  },
-
   opcion: {
-    backgroundColor: COLORES.tarjeta,
-    borderColor: COLORES.bordeTarjeta,
-    borderRadius: 15,
-    marginBottom: 10,
+    backgroundColor: "#24160B",
+    borderColor: "#62451F",
+    borderRadius: 16,
   },
 
   opcionContenido: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 14,
+    padding: 15,
+    gap: 12,
   },
 
   iconoOpcion: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(212, 175, 55, 0.12)",
-    justifyContent: "center",
+    width: 43,
+    height: 43,
+    borderRadius: 14,
+    backgroundColor: "#382510",
     alignItems: "center",
-  },
-
-  textosOpcion: {
-    flex: 1,
-    marginLeft: 14,
+    justifyContent: "center",
   },
 
   tituloOpcion: {
-    color: COLORES.crema,
-    fontFamily: FUENTES.principal,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-
-  descripcionOpcion: {
-    color: COLORES.textoSecundario,
-    fontFamily: FUENTES.principal,
-    fontSize: 10,
-    marginTop: 2,
-  },
-
-  botonCerrar: {
-    marginTop: 10,
-    marginBottom: 20,
-    borderColor: COLORES.dorado,
-    borderRadius: 10,
-  },
-
-  textoCerrar: {
-    fontFamily: FUENTES.principal,
-    fontSize: 13,
+    color: C.crema,
+    fontSize: 15,
     fontWeight: "bold",
-    letterSpacing: 1,
   },
 
-  modal: {
-    backgroundColor: COLORES.tarjeta,
-    borderRadius: 20,
-    borderColor: COLORES.bordeTarjeta,
-    borderWidth: 1,
-  },
-
-  tituloModal: {
-    color: COLORES.crema,
-    fontFamily: FUENTES.principal,
-    fontWeight: "bold",
-    letterSpacing: 1,
-  },
-
-  textoModal: {
-    color: COLORES.textoSecundario,
-    fontFamily: FUENTES.principal,
-    fontSize: 13,
-  },
-
-  pantallaCarga: {
-    flex: 1,
-    backgroundColor: COLORES.fondo,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  logoCarga: {
-    color: COLORES.dorado,
-    fontFamily: FUENTES.principal,
-    fontSize: 32,
-    fontWeight: "bold",
-    letterSpacing: 3,
-    marginBottom: 24,
-  },
-
-  loader: {
-    marginVertical: 16,
-  },
-
-  textoCarga: {
-    color: COLORES.textoSecundario,
-    fontFamily: FUENTES.principal,
-    fontSize: 14,
-    letterSpacing: 1,
+  salir: {
+    borderColor: C.bordeTarjeta,
+    borderRadius: 14,
+    marginTop: 17,
   },
 
   error: {
-    color: COLORES.error,
-    marginVertical: 12,
+    color: C.error,
+    fontSize: 13,
+    lineHeight: 21,
+  },
+
+  dialogo: {
+    backgroundColor: "#24160B",
+  },
+
+  centro: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
+    backgroundColor: C.fondo,
   },
 });

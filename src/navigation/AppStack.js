@@ -1,5 +1,3 @@
-// src/navigation/AppStack.js
-
 import React from "react";
 
 import {
@@ -13,14 +11,22 @@ import {
   Text,
 } from "react-native-paper";
 
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  createNativeStackNavigator,
+} from "@react-navigation/native-stack";
 
 import { useAuth } from "../context/AuthContext";
+import { useRol } from "../hooks/useRol";
 import { COLORES } from "../styles/paleta";
 
 import AuthStack from "./AuthStack";
 import MainTabs from "./MainTabs";
-import CompletarPerfil from "../../screens/CompletarPerfil";
+
+import CompletarPerfil from
+  "../../screens/CompletarPerfil";
+
+import PanelPersonal from
+  "../../screens/PanelPersonal";
 
 const Stack = createNativeStackNavigator();
 
@@ -33,13 +39,36 @@ export default function AppStack() {
     registrando,
     errorSesion,
     reintentarSesion,
+    salir,
   } = useAuth();
 
-  const preparandoSesion =
-    cargandoAuth ||
-    (cuenta && (cargandoPerfil || registrando));
+  const {
+    rol,
+    cargando: cargandoRol,
+    error: errorRol,
+    reintentar: reintentarRol,
+  } = useRol(cuenta?.uid);
 
-  if (preparandoSesion) {
+  const esPersonal =
+    rol === "administrador" ||
+    rol === "operador";
+
+  const cargando =
+    cargandoAuth ||
+    (
+      !!cuenta &&
+      (
+        cargandoRol ||
+        registrando ||
+        (
+          !errorRol &&
+          !esPersonal &&
+          cargandoPerfil
+        )
+      )
+    );
+
+  if (cargando) {
     return (
       <View style={styles.centro}>
         <ActivityIndicator
@@ -48,25 +77,42 @@ export default function AppStack() {
         />
 
         <Text style={styles.texto}>
-          Preparando tu sesión...
+          Preparando tu acceso…
         </Text>
       </View>
     );
   }
 
-  if (errorSesion) {
+  if (errorSesion || (cuenta && errorRol)) {
     return (
       <View style={styles.centro}>
         <Text style={styles.texto}>
-          {errorSesion}
+          {errorSesion || errorRol}
         </Text>
 
         <Button
           textColor={COLORES.doradoClaro}
-          onPress={reintentarSesion}
+          onPress={
+            errorSesion
+              ? reintentarSesion
+              : reintentarRol
+          }
         >
-          REINTENTAR
+          Reintentar
         </Button>
+
+        {!!cuenta && (
+          <Button
+            textColor={COLORES.error}
+            onPress={() => {
+              salir().catch(() => {
+                // La pantalla de error permanece disponible.
+              });
+            }}
+          >
+            Cerrar sesión
+          </Button>
+        )}
       </View>
     );
   }
@@ -82,10 +128,20 @@ export default function AppStack() {
           name="Auth"
           component={AuthStack}
         />
+      ) : esPersonal ? (
+        <Stack.Screen
+          name="Personal"
+          navigationKey={`${cuenta.uid}-${rol}`}
+        >
+          {() => (
+            <PanelPersonal rol={rol} />
+          )}
+        </Stack.Screen>
       ) : !usuario ? (
         <Stack.Screen
           name="CompletarPerfil"
           component={CompletarPerfil}
+          navigationKey={cuenta.uid}
         />
       ) : (
         <Stack.Screen
@@ -101,15 +157,17 @@ export default function AppStack() {
 const styles = StyleSheet.create({
   centro: {
     flex: 1,
+    padding: 24,
     backgroundColor: COLORES.fondo,
     justifyContent: "center",
     alignItems: "center",
-    padding: 24,
+    gap: 18,
   },
 
   texto: {
     color: COLORES.crema,
-    marginVertical: 20,
     textAlign: "center",
+    fontSize: 15,
+    lineHeight: 23,
   },
 });

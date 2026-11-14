@@ -20,7 +20,17 @@
     },
     "plugins": [
       "expo-font",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "InkaPark necesita acceder a la cámara para escanear y validar los boletos de ingreso.",
+          "recordAudioAndroid": false
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-notifications"
     ]
   }
 }
