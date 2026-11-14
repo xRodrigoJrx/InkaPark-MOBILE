@@ -1,6 +1,6 @@
 // screens/Atracciones.js
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   Image,
@@ -10,10 +10,11 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { Button, Card, Text } from "react-native-paper";
+import { ActivityIndicator, Button, Card, Text } from "react-native-paper";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
-import atracciones from "../src/data/atracciones.json";
+import { obtenerAtracciones } from "../src/services/atraccionesService";
 
 const FUENTE_INCA = Platform.select({
   ios: "Georgia",
@@ -32,26 +33,79 @@ const FILTROS = [
 ];
 
 export default function Atracciones({ navigation }) {
+  const [atracciones, setAtracciones] = useState([]);
   const [filtroActivo, setFiltroActivo] = useState("todas");
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(false);
+  const [intentoCarga, setIntentoCarga] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelado = false;
+
+      async function cargarAtracciones() {
+        setCargando(true);
+        setError(false);
+
+        try {
+          const datos = await obtenerAtracciones();
+
+          if (!cancelado) {
+            setAtracciones(datos);
+          }
+        } catch (errorCarga) {
+          console.warn(
+            "Error al cargar atracciones:",
+            errorCarga.code,
+            errorCarga.message
+          );
+
+          if (!cancelado) {
+            setError(true);
+          }
+        } finally {
+          if (!cancelado) {
+            setCargando(false);
+          }
+        }
+      }
+
+      cargarAtracciones();
+
+      return () => {
+        cancelado = true;
+      };
+    }, [intentoCarga])
+  );
 
   const lista = useMemo(() => {
-    if (!Array.isArray(atracciones)) return [];
-    if (filtroActivo === "todas") return atracciones;
+    if (filtroActivo === "todas") {
+      return atracciones;
+    }
 
-    return atracciones.filter((a) => {
-      const cat = (a.categoria || "").toLowerCase();
-      const inten = (a.intensidad || "").toLowerCase();
+    return atracciones.filter((atraccion) => {
+      const categoria = (atraccion.categoria || "").toLowerCase();
+      const intensidad = (atraccion.intensidad || "").toLowerCase();
       const filtro = filtroActivo.toLowerCase();
 
       if (filtro === "familiar") {
-        return inten.includes("familiar") || cat.includes("familiar");
+        return (
+          intensidad.includes("familiar") ||
+          categoria.includes("familiar")
+        );
       }
-      return cat === filtro || inten === filtro;
-    });
-  }, [filtroActivo]);
 
-  const abrirDetalle = (item) =>
+      return categoria === filtro || intensidad === filtro;
+    });
+  }, [atracciones, filtroActivo]);
+
+  const abrirDetalle = (item) => {
     navigation.navigate("DetalleAtraccion", { atraccion: item });
+  };
+
+  const reintentarCarga = () => {
+    setIntentoCarga((actual) => actual + 1);
+  };
 
   const renderItem = ({ item }) => (
     <Card style={styles.card} mode="outlined">
@@ -101,6 +155,7 @@ export default function Atracciones({ navigation }) {
           style={styles.logo}
           resizeMode="contain"
         />
+
         <View style={{ flex: 1 }}>
           <Text style={styles.tituloHeader}>INKAPARK</Text>
           <Text style={styles.subtituloHeader}>
@@ -124,12 +179,13 @@ export default function Atracciones({ navigation }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filtrosContenido}
         >
-          {FILTROS.map((f) => {
-            const activo = filtroActivo === f.id;
+          {FILTROS.map((filtro) => {
+            const activo = filtroActivo === filtro.id;
+
             return (
               <Pressable
-                key={f.id}
-                onPress={() => setFiltroActivo(f.id)}
+                key={filtro.id}
+                onPress={() => setFiltroActivo(filtro.id)}
                 style={[
                   styles.chip,
                   activo ? styles.chipActivo : styles.chipInactivo,
@@ -139,10 +195,12 @@ export default function Atracciones({ navigation }) {
                   numberOfLines={1}
                   style={[
                     styles.chipTexto,
-                    activo ? styles.chipTextoActivo : styles.chipTextoInactivo,
+                    activo
+                      ? styles.chipTextoActivo
+                      : styles.chipTextoInactivo,
                   ]}
                 >
-                  {f.label}
+                  {filtro.label}
                 </Text>
               </Pressable>
             );
@@ -150,23 +208,51 @@ export default function Atracciones({ navigation }) {
         </ScrollView>
       </View>
 
-      {/* LISTA */}
-      <FlatList
-        data={lista}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderItem}
-        contentContainerStyle={styles.lista}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <Text style={styles.mensaje}>No hay atracciones en este filtro.</Text>
-        }
-      />
+      {/* CARGA, ERROR O LISTA */}
+      {cargando ? (
+        <View style={styles.estadoContenido}>
+          <ActivityIndicator size="large" color={COLORES.dorado} />
+          <Text style={styles.mensaje}>Cargando atracciones...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.estadoContenido}>
+          <Text style={styles.mensaje}>
+            No se pudieron cargar las atracciones.
+            {"\n"}
+            Comprueba tu conexión e inténtalo nuevamente.
+          </Text>
+
+          <Button
+            mode="outlined"
+            textColor={COLORES.doradoClaro}
+            onPress={reintentarCarga}
+          >
+            REINTENTAR
+          </Button>
+        </View>
+      ) : (
+        <FlatList
+          data={lista}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderItem}
+          contentContainerStyle={styles.lista}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={styles.mensaje}>
+              No hay atracciones en este filtro.
+            </Text>
+          }
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: COLORES.fondo },
+  contenedor: {
+    flex: 1,
+    backgroundColor: COLORES.fondo,
+  },
 
   header: {
     flexDirection: "row",
@@ -175,7 +261,13 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 10,
   },
-  logo: { width: 45, height: 45, marginRight: 10 },
+
+  logo: {
+    width: 45,
+    height: 45,
+    marginRight: 10,
+  },
+
   tituloHeader: {
     color: COLORES.crema,
     fontFamily: FUENTE_INCA,
@@ -183,6 +275,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     letterSpacing: 2.5,
   },
+
   subtituloHeader: {
     color: COLORES.doradoClaro,
     fontFamily: FUENTES.principal,
@@ -190,7 +283,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 
-  tituloWrap: { paddingHorizontal: 15, marginTop: 4, marginBottom: 8 },
+  tituloWrap: {
+    paddingHorizontal: 15,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+
   titulo: {
     color: COLORES.crema,
     fontFamily: FUENTE_INCA,
@@ -198,6 +296,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     letterSpacing: 2,
   },
+
   subtitulo: {
     color: COLORES.textoSecundario,
     fontFamily: FUENTES.principal,
@@ -205,17 +304,18 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // FILTROS — con separación arriba y abajo
   filtrosWrap: {
     paddingTop: 6,
     paddingBottom: 6,
-    marginBottom: 12,   // 👈 separación con la primera card
+    marginBottom: 12,
   },
+
   filtrosContenido: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     alignItems: "center",
   },
+
   chip: {
     minWidth: 90,
     height: 40,
@@ -226,14 +326,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   chipActivo: {
     backgroundColor: COLORES.dorado,
     borderColor: COLORES.dorado,
   },
+
   chipInactivo: {
     backgroundColor: "transparent",
     borderColor: COLORES.dorado,
   },
+
   chipTexto: {
     fontFamily: FUENTE_INCA,
     fontSize: 14,
@@ -243,13 +346,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     includeFontPadding: false,
   },
-  chipTextoActivo: { color: "#1A1208" },
-  chipTextoInactivo: { color: COLORES.crema },
 
-  // LISTA con padding superior extra
+  chipTextoActivo: {
+    color: "#1A1208",
+  },
+
+  chipTextoInactivo: {
+    color: COLORES.crema,
+  },
+
   lista: {
     paddingHorizontal: 15,
-    paddingTop: 8,      // 👈 margen interno extra con la primera card
+    paddingTop: 8,
     paddingBottom: 30,
   },
 
@@ -260,13 +368,19 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     overflow: "hidden",
   },
-  cardContenido: { flexDirection: "row", padding: 10 },
+
+  cardContenido: {
+    flexDirection: "row",
+    padding: 10,
+  },
+
   cardImagenWrap: {
     width: 110,
     height: 130,
     borderRadius: 12,
     overflow: "hidden",
   },
+
   cardImagen: {
     width: "100%",
     height: "100%",
@@ -277,6 +391,7 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     justifyContent: "space-between",
   },
+
   cardTitulo: {
     color: COLORES.crema,
     fontFamily: FUENTE_INCA,
@@ -284,12 +399,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
   },
+
   cardMeta: {
     color: COLORES.textoSecundario,
     fontFamily: FUENTES.principal,
     fontSize: 11,
     marginTop: 4,
   },
+
   cardHorario: {
     color: COLORES.dorado,
     fontFamily: FUENTE_INCA,
@@ -298,16 +415,25 @@ const styles = StyleSheet.create({
     marginTop: 6,
     letterSpacing: 0.5,
   },
+
   cardBoton: {
     marginTop: 8,
     borderRadius: 20,
     alignSelf: "flex-start",
   },
+
   cardBotonTexto: {
     fontFamily: FUENTE_INCA,
     fontSize: 10,
     fontWeight: "bold",
     letterSpacing: 1,
+  },
+
+  estadoContenido: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
   },
 
   mensaje: {

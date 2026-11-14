@@ -1,6 +1,6 @@
 // screens/Espectaculos.js
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   Image,
@@ -10,10 +10,17 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { Card, Icon, Text } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  Icon,
+  Text,
+} from "react-native-paper";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
-import espectaculos from "../src/data/espectaculos.json";
+import { obtenerEspectaculos } from "../src/services/espectaculosService";
 
 const FUENTE_INCA = Platform.select({
   ios: "Georgia",
@@ -32,69 +39,165 @@ const FILTROS = [
 ];
 
 export default function Espectaculos({ navigation }) {
+  const [espectaculos, setEspectaculos] = useState([]);
   const [filtroActivo, setFiltroActivo] = useState("todos");
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(false);
+  const [intentoCarga, setIntentoCarga] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelado = false;
+
+      async function cargarEspectaculos() {
+        setCargando(true);
+        setError(false);
+
+        try {
+          const datos = await obtenerEspectaculos();
+
+          // La lista y el detalle necesitan horarios como array de strings.
+          if (
+            !Array.isArray(datos) ||
+            datos.some(
+              (item) =>
+                !Array.isArray(item.horarios) ||
+                !item.horarios.every(
+                  (horario) => typeof horario === "string"
+                )
+            )
+          ) {
+            throw new Error(
+              "Los espectáculos deben tener un array de horarios válido."
+            );
+          }
+
+          if (!cancelado) {
+            setEspectaculos(datos);
+          }
+        } catch (errorCarga) {
+          console.warn(
+            "Error al cargar espectáculos:",
+            errorCarga.code,
+            errorCarga.message
+          );
+
+          if (!cancelado) {
+            setError(true);
+          }
+        } finally {
+          if (!cancelado) {
+            setCargando(false);
+          }
+        }
+      }
+
+      cargarEspectaculos();
+
+      return () => {
+        cancelado = true;
+      };
+    }, [intentoCarga])
+  );
 
   const lista = useMemo(() => {
-    if (!Array.isArray(espectaculos)) return [];
-    if (filtroActivo === "todos") return espectaculos;
-    return espectaculos.filter((e) => e.tipo === filtroActivo);
-  }, [filtroActivo]);
+    if (filtroActivo === "todos") {
+      return espectaculos;
+    }
 
-  const abrirDetalle = (item) =>
-    navigation.navigate("DetalleEspectaculo", { espectaculo: item });
+    return espectaculos.filter(
+      (espectaculo) => espectaculo.tipo === filtroActivo
+    );
+  }, [espectaculos, filtroActivo]);
+
+  const abrirDetalle = (item) => {
+    navigation.navigate("DetalleEspectaculo", {
+      espectaculo: item,
+    });
+  };
+
+  const reintentarCarga = () => {
+    setIntentoCarga((actual) => actual + 1);
+  };
 
   const renderItem = ({ item }) => (
     <Pressable
       onPress={() => abrirDetalle(item)}
       style={styles.cardWrap}
     >
-      {/* Card estilo "invitación" */}
       <Card style={styles.card} mode="outlined">
         <View style={styles.cardContenido}>
-          {/* Imagen superior */}
+          {/* IMAGEN */}
           <View style={styles.imagenWrap}>
-            <Image source={IMAGEN_ESPECTACULO} style={styles.imagen} />
+            <Image
+              source={IMAGEN_ESPECTACULO}
+              style={styles.imagen}
+            />
             <View style={styles.imagenOverlay} />
 
-            {/* Badge del tipo */}
             <View style={styles.badgeTipo}>
-              <Text style={styles.badgeTipoTexto}>{item.tipo}</Text>
+              <Text style={styles.badgeTipoTexto}>
+                {item.tipo}
+              </Text>
             </View>
           </View>
 
-          {/* Contenido */}
+          {/* INFORMACIÓN */}
           <View style={styles.cardInfo}>
-            {/* Frase de invitación */}
-            <Text style={styles.invitacion}>“{item.invitacion}”</Text>
+            <Text style={styles.invitacion}>
+              “{item.invitacion}”
+            </Text>
 
-            <Text style={styles.titulo}>{item.nombre}</Text>
+            <Text style={styles.titulo}>
+              {item.nombre}
+            </Text>
 
-            <Text style={styles.descripcion}>{item.descripcion}</Text>
+            <Text style={styles.descripcion}>
+              {item.descripcion}
+            </Text>
 
-            {/* Fila de datos: duración + ubicación */}
             <View style={styles.metaRow}>
               <View style={styles.metaItem}>
-                <Icon source="clock-outline" size={14} color={COLORES.dorado} />
-                <Text style={styles.metaTexto}>{item.duracion}</Text>
+                <Icon
+                  source="clock-outline"
+                  size={14}
+                  color={COLORES.dorado}
+                />
+                <Text style={styles.metaTexto}>
+                  {item.duracion}
+                </Text>
               </View>
 
               <View style={styles.metaItem}>
-                <Icon source="map-marker-outline" size={14} color={COLORES.dorado} />
-                <Text style={styles.metaTexto}>{item.ubicacion}</Text>
+                <Icon
+                  source="map-marker-outline"
+                  size={14}
+                  color={COLORES.dorado}
+                />
+                <Text style={styles.metaTexto}>
+                  {item.ubicacion}
+                </Text>
               </View>
             </View>
 
-            {/* Horarios como "sellos" */}
+            {/* HORARIOS */}
             <View style={styles.horariosRow}>
-              {item.horarios.map((h, i) => (
-                <View key={i} style={styles.horarioSello}>
-                  <Text style={styles.horarioTexto}>{h}</Text>
+              {item.horarios.map((horario, indice) => (
+                <View
+                  key={`${horario}-${indice}`}
+                  style={styles.horarioSello}
+                >
+                  <Text style={styles.horarioTexto}>
+                    {horario}
+                  </Text>
                 </View>
               ))}
             </View>
 
             <View style={styles.botonWrap}>
-              <Text style={styles.botonTexto}>VER DETALLE →</Text>
+              <Text style={styles.botonTexto}>
+                VER DETALLE →
+              </Text>
             </View>
           </View>
         </View>
@@ -111,8 +214,11 @@ export default function Espectaculos({ navigation }) {
           style={styles.logo}
           resizeMode="contain"
         />
+
         <View style={{ flex: 1 }}>
-          <Text style={styles.tituloHeader}>INKAPARK</Text>
+          <Text style={styles.tituloHeader}>
+            INKAPARK
+          </Text>
           <Text style={styles.subtituloHeader}>
             AVENTURA, CULTURA Y NATURALEZA
           </Text>
@@ -121,7 +227,9 @@ export default function Espectaculos({ navigation }) {
 
       {/* TÍTULO */}
       <View style={styles.tituloWrap}>
-        <Text style={styles.tituloSeccion}>ESPECTÁCULOS</Text>
+        <Text style={styles.tituloSeccion}>
+          ESPECTÁCULOS
+        </Text>
         <Text style={styles.subtituloSeccion}>
           Vive la magia del teatro, la danza y la música andina.
         </Text>
@@ -134,25 +242,30 @@ export default function Espectaculos({ navigation }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filtrosContenido}
         >
-          {FILTROS.map((f) => {
-            const activo = filtroActivo === f.id;
+          {FILTROS.map((filtro) => {
+            const activo = filtroActivo === filtro.id;
+
             return (
               <Pressable
-                key={f.id}
-                onPress={() => setFiltroActivo(f.id)}
+                key={filtro.id}
+                onPress={() => setFiltroActivo(filtro.id)}
                 style={[
                   styles.chip,
-                  activo ? styles.chipActivo : styles.chipInactivo,
+                  activo
+                    ? styles.chipActivo
+                    : styles.chipInactivo,
                 ]}
               >
                 <Text
                   numberOfLines={1}
                   style={[
                     styles.chipTexto,
-                    activo ? styles.chipTextoActivo : styles.chipTextoInactivo,
+                    activo
+                      ? styles.chipTextoActivo
+                      : styles.chipTextoInactivo,
                   ]}
                 >
-                  {f.label}
+                  {filtro.label}
                 </Text>
               </Pressable>
             );
@@ -160,23 +273,56 @@ export default function Espectaculos({ navigation }) {
         </ScrollView>
       </View>
 
-      {/* LISTA */}
-      <FlatList
-        data={lista}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderItem}
-        contentContainerStyle={styles.lista}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <Text style={styles.mensaje}>No hay espectáculos en este filtro.</Text>
-        }
-      />
+      {/* CARGA, ERROR O LISTA */}
+      {cargando ? (
+        <View style={styles.estadoContenido}>
+          <ActivityIndicator
+            size="large"
+            color={COLORES.dorado}
+          />
+          <Text style={styles.mensaje}>
+            Cargando espectáculos...
+          </Text>
+        </View>
+      ) : error ? (
+        <View style={styles.estadoContenido}>
+          <Text style={styles.mensaje}>
+            No se pudieron cargar los espectáculos.
+            {"\n"}
+            Comprueba tu conexión e inténtalo nuevamente.
+          </Text>
+
+          <Button
+            mode="outlined"
+            textColor={COLORES.doradoClaro}
+            onPress={reintentarCarga}
+          >
+            REINTENTAR
+          </Button>
+        </View>
+      ) : (
+        <FlatList
+          data={lista}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderItem}
+          contentContainerStyle={styles.lista}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={styles.mensaje}>
+              No hay espectáculos en este filtro.
+            </Text>
+          }
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenedor: { flex: 1, backgroundColor: COLORES.fondo },
+  contenedor: {
+    flex: 1,
+    backgroundColor: COLORES.fondo,
+  },
 
   header: {
     flexDirection: "row",
@@ -185,7 +331,13 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 10,
   },
-  logo: { width: 45, height: 45, marginRight: 10 },
+
+  logo: {
+    width: 45,
+    height: 45,
+    marginRight: 10,
+  },
+
   tituloHeader: {
     color: COLORES.crema,
     fontFamily: FUENTE_INCA,
@@ -193,6 +345,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     letterSpacing: 2.5,
   },
+
   subtituloHeader: {
     color: COLORES.doradoClaro,
     fontFamily: FUENTES.principal,
@@ -200,7 +353,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 
-  tituloWrap: { paddingHorizontal: 15, marginTop: 4, marginBottom: 8 },
+  tituloWrap: {
+    paddingHorizontal: 15,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+
   tituloSeccion: {
     color: COLORES.crema,
     fontFamily: FUENTE_INCA,
@@ -208,6 +366,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     letterSpacing: 2,
   },
+
   subtituloSeccion: {
     color: COLORES.textoSecundario,
     fontFamily: FUENTES.principal,
@@ -215,13 +374,18 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // FILTROS
-  filtrosWrap: { paddingTop: 6, paddingBottom: 6, marginBottom: 12 },
+  filtrosWrap: {
+    paddingTop: 6,
+    paddingBottom: 6,
+    marginBottom: 12,
+  },
+
   filtrosContenido: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     alignItems: "center",
   },
+
   chip: {
     minWidth: 90,
     height: 40,
@@ -232,14 +396,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   chipActivo: {
     backgroundColor: COLORES.dorado,
     borderColor: COLORES.dorado,
   },
+
   chipInactivo: {
     backgroundColor: "transparent",
     borderColor: COLORES.dorado,
   },
+
   chipTexto: {
     fontFamily: FUENTE_INCA,
     fontSize: 14,
@@ -249,14 +416,25 @@ const styles = StyleSheet.create({
     textAlign: "center",
     includeFontPadding: false,
   },
-  chipTextoActivo: { color: "#1A1208" },
-  chipTextoInactivo: { color: COLORES.crema },
 
-  // LISTA
-  lista: { paddingHorizontal: 15, paddingTop: 8, paddingBottom: 30 },
+  chipTextoActivo: {
+    color: "#1A1208",
+  },
 
-  // CARD estilo "invitación"
-  cardWrap: { marginBottom: 16 },
+  chipTextoInactivo: {
+    color: COLORES.crema,
+  },
+
+  lista: {
+    paddingHorizontal: 15,
+    paddingTop: 8,
+    paddingBottom: 30,
+  },
+
+  cardWrap: {
+    marginBottom: 16,
+  },
+
   card: {
     backgroundColor: COLORES.tarjeta,
     borderColor: COLORES.dorado,
@@ -264,14 +442,26 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
   },
-  cardContenido: { flexDirection: "column" },
 
-  imagenWrap: { width: "100%", height: 150 },
-  imagen: { width: "100%", height: "100%" },
+  cardContenido: {
+    flexDirection: "column",
+  },
+
+  imagenWrap: {
+    width: "100%",
+    height: 150,
+  },
+
+  imagen: {
+    width: "100%",
+    height: "100%",
+  },
+
   imagenOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.40)",
   },
+
   badgeTipo: {
     position: "absolute",
     top: 12,
@@ -281,6 +471,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 14,
   },
+
   badgeTipoTexto: {
     color: "#1A1208",
     fontFamily: FUENTE_INCA,
@@ -289,7 +480,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  cardInfo: { padding: 16 },
+  cardInfo: {
+    padding: 16,
+  },
 
   invitacion: {
     color: COLORES.dorado,
@@ -299,6 +492,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 6,
   },
+
   titulo: {
     color: COLORES.crema,
     fontFamily: FUENTE_INCA,
@@ -306,6 +500,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     letterSpacing: 1.2,
   },
+
   descripcion: {
     color: COLORES.textoSecundario,
     fontFamily: FUENTES.principal,
@@ -319,20 +514,26 @@ const styles = StyleSheet.create({
     marginTop: 14,
     gap: 16,
   },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+
   metaTexto: {
     color: COLORES.crema,
     fontFamily: FUENTES.principal,
     fontSize: 11,
   },
 
-  // Sellos de horarios
   horariosRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginTop: 12,
     gap: 8,
   },
+
   horarioSello: {
     borderWidth: 1,
     borderColor: COLORES.dorado,
@@ -341,6 +542,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     backgroundColor: "rgba(217,173,56,0.10)",
   },
+
   horarioTexto: {
     color: COLORES.dorado,
     fontFamily: FUENTE_INCA,
@@ -356,12 +558,20 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     alignItems: "flex-end",
   },
+
   botonTexto: {
     color: COLORES.dorado,
     fontFamily: FUENTE_INCA,
     fontSize: 12,
     fontWeight: "bold",
     letterSpacing: 1.5,
+  },
+
+  estadoContenido: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
   },
 
   mensaje: {

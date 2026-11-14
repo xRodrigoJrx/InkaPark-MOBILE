@@ -1,22 +1,17 @@
-import React, { useState } from "react";
+
+import React from "react";
 
 import { NavigationContainer } from "@react-navigation/native";
 
+import { AuthProvider } from "./src/context/AuthContext";
 import AppStack from "./src/navigation/AppStack";
 
 export default function App() {
-  const [usuario, setUsuario] = useState(null);
-
-  const [sesionActiva, setSesionActiva] = useState(false);
-
   return (
-    <NavigationContainer>
-      <AppStack
-        usuario={usuario}
-        setUsuario={setUsuario}
-        sesionActiva={sesionActiva}
-        setSesionActiva={setSesionActiva}
-      />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <AppStack />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }

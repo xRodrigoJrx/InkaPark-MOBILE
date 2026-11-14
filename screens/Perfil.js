@@ -1,13 +1,13 @@
 // screens/Perfil.js
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+
 import {
   ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
   View,
-  useWindowDimensions,
 } from "react-native";
 
 import {
@@ -20,45 +20,78 @@ import {
 } from "react-native-paper";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
+import { useAuth } from "../src/context/AuthContext";
+import { mensajeAuth } from "../src/utils/authErrors";
 
 function OpcionPerfil({ icono, titulo, descripcion }) {
   return (
     <Card mode="outlined" style={styles.opcion}>
       <View style={styles.opcionContenido}>
         <View style={styles.iconoOpcion}>
-          <Icon source={icono} size={22} color={COLORES.dorado} />
+          <Icon
+            source={icono}
+            size={22}
+            color={COLORES.dorado}
+          />
         </View>
 
         <View style={styles.textosOpcion}>
-          <Text style={styles.tituloOpcion}>{titulo}</Text>
-          <Text style={styles.descripcionOpcion}>{descripcion}</Text>
+          <Text style={styles.tituloOpcion}>
+            {titulo}
+          </Text>
+
+          <Text style={styles.descripcionOpcion}>
+            {descripcion}
+          </Text>
         </View>
 
-        <Icon source="chevron-right" size={22} color={COLORES.doradoClaro} />
+        <Icon
+          source="chevron-right"
+          size={22}
+          color={COLORES.doradoClaro}
+        />
       </View>
     </Card>
   );
 }
 
-export default function Perfil({ usuario, setSesionActiva }) {
-  const { width } = useWindowDimensions();
+export default function Perfil() {
+  const { usuario, salir } = useAuth();
+
   const [mostrarModal, setMostrarModal] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
+  const [errorSalida, setErrorSalida] = useState("");
 
-  const cerrarSesion = () => {
+  const salidaEnCurso = useRef(false);
+
+  async function cerrarSesion() {
+    if (salidaEnCurso.current) {
+      return;
+    }
+
+    salidaEnCurso.current = true;
     setMostrarModal(false);
+    setErrorSalida("");
     setCerrandoSesion(true);
 
-    setTimeout(() => {
+    try {
+      await salir();
+
+      // AppStack volverá automáticamente al Login.
+    } catch (error) {
+      setErrorSalida(mensajeAuth(error));
+    } finally {
+      salidaEnCurso.current = false;
       setCerrandoSesion(false);
-      setSesionActiva(false);
-    }, 1500);
-  };
+    }
+  }
 
   if (cerrandoSesion) {
     return (
       <View style={styles.pantallaCarga}>
-        <Text style={styles.logoCarga}>INKAPARK</Text>
+        <Text style={styles.logoCarga}>
+          INKAPARK
+        </Text>
 
         <ActivityIndicator
           size="large"
@@ -66,7 +99,9 @@ export default function Perfil({ usuario, setSesionActiva }) {
           style={styles.loader}
         />
 
-        <Text style={styles.textoCarga}>Cerrando sesión...</Text>
+        <Text style={styles.textoCarga}>
+          Cerrando sesión...
+        </Text>
       </View>
     );
   }
@@ -77,7 +112,7 @@ export default function Perfil({ usuario, setSesionActiva }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scroll}
       >
-        {/* HEADER (igual que Inicio) */}
+        {/* HEADER */}
         <View style={styles.header}>
           <View style={styles.headerContenido}>
             <Image
@@ -87,7 +122,9 @@ export default function Perfil({ usuario, setSesionActiva }) {
             />
 
             <View>
-              <Text style={styles.tituloHeader}>INKAPARK</Text>
+              <Text style={styles.tituloHeader}>
+                INKAPARK
+              </Text>
 
               <Text style={styles.subtituloHeader}>
                 AVENTURA, CULTURA Y NATURALEZA
@@ -96,38 +133,44 @@ export default function Perfil({ usuario, setSesionActiva }) {
           </View>
         </View>
 
-        {/* TÍTULO DE SECCIÓN */}
-        <Text style={styles.tituloSeccion}>MI PERFIL</Text>
+        <Text style={styles.tituloSeccion}>
+          MI PERFIL
+        </Text>
 
         <Text style={styles.subtituloSeccion}>
           Administra tu cuenta y preferencias.
         </Text>
 
-        {/* TARJETA USUARIO */}
-        <Card style={styles.tarjetaUsuario} mode="outlined">
+        {/* DATOS DEL USUARIO */}
+        <Card
+          style={styles.tarjetaUsuario}
+          mode="outlined"
+        >
           <View style={styles.usuarioContenido}>
             <View style={styles.avatar}>
               <Text style={styles.avatarTexto}>
                 {usuario?.nombre
                   ? usuario.nombre.substring(0, 2).toUpperCase()
-                  : "RN"}
+                  : "IK"}
               </Text>
             </View>
 
             <View style={styles.infoUsuario}>
               <Text style={styles.nombreUsuario}>
-                {usuario?.nombre || "RODRIGO NAVARRO"}
+                {usuario?.nombre || "Usuario"}
               </Text>
 
               <Text style={styles.correoUsuario}>
-                {usuario?.correo || "correo@email.com"}
+                {usuario?.correo || ""}
               </Text>
             </View>
           </View>
         </Card>
 
-        {/* LISTA DE OPCIONES */}
-        <Text style={styles.tituloSeccion}>OPCIONES</Text>
+        {/* OPCIONES VISUALES EXISTENTES */}
+        <Text style={styles.tituloSeccion}>
+          OPCIONES
+        </Text>
 
         <View style={styles.listaOpciones}>
           <OpcionPerfil
@@ -161,7 +204,12 @@ export default function Perfil({ usuario, setSesionActiva }) {
           />
         </View>
 
-        {/* BOTÓN CERRAR SESIÓN */}
+        {errorSalida !== "" && (
+          <Text style={styles.error}>
+            {errorSalida}
+          </Text>
+        )}
+
         <Button
           mode="outlined"
           textColor={COLORES.doradoClaro}
@@ -173,7 +221,7 @@ export default function Perfil({ usuario, setSesionActiva }) {
         </Button>
       </ScrollView>
 
-      {/* MODAL DE CONFIRMACIÓN */}
+      {/* CONFIRMACIÓN DE CIERRE */}
       <Portal>
         <Dialog
           visible={mostrarModal}
@@ -198,7 +246,10 @@ export default function Perfil({ usuario, setSesionActiva }) {
               CANCELAR
             </Button>
 
-            <Button textColor={COLORES.dorado} onPress={cerrarSesion}>
+            <Button
+              textColor={COLORES.dorado}
+              onPress={cerrarSesion}
+            >
               SALIR
             </Button>
           </Dialog.Actions>
@@ -218,8 +269,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingBottom: 40,
   },
-
-  // HEADER (idéntico a Inicio)
 
   header: {
     marginTop: 20,
@@ -252,8 +301,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 
-  // TÍTULOS DE SECCIÓN
-
   tituloSeccion: {
     color: COLORES.crema,
     fontFamily: FUENTES.principal,
@@ -270,8 +317,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 15,
   },
-
-  // TARJETA USUARIO
 
   tarjetaUsuario: {
     backgroundColor: COLORES.tarjeta,
@@ -322,8 +367,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // LISTA DE OPCIONES
-
   listaOpciones: {
     marginBottom: 10,
   },
@@ -369,8 +412,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // BOTÓN CERRAR SESIÓN
-
   botonCerrar: {
     marginTop: 10,
     marginBottom: 20,
@@ -384,35 +425,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
   },
-
-  // BANNER FINAL
-
-  bannerFinal: {
-    width: "100%",
-    backgroundColor: COLORES.tarjeta,
-    borderColor: COLORES.bordeTarjeta,
-    borderRadius: 20,
-    marginTop: 10,
-  },
-
-  tituloBanner: {
-    color: COLORES.crema,
-    fontFamily: FUENTES.principal,
-    fontWeight: "bold",
-    fontSize: 15,
-    textAlign: "center",
-  },
-
-  textoBanner: {
-    color: COLORES.textoSecundario,
-    fontFamily: FUENTES.principal,
-    fontSize: 10,
-    textAlign: "center",
-    marginTop: 10,
-    lineHeight: 16,
-  },
-
-  // MODAL
 
   modal: {
     backgroundColor: COLORES.tarjeta,
@@ -433,8 +445,6 @@ const styles = StyleSheet.create({
     fontFamily: FUENTES.principal,
     fontSize: 13,
   },
-
-  // PANTALLA DE CARGA
 
   pantallaCarga: {
     flex: 1,
@@ -461,5 +471,10 @@ const styles = StyleSheet.create({
     fontFamily: FUENTES.principal,
     fontSize: 14,
     letterSpacing: 1,
+  },
+
+  error: {
+    color: COLORES.error,
+    marginVertical: 12,
   },
 });

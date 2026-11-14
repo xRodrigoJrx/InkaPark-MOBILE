@@ -6,24 +6,21 @@
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "dark",
-
     "ios": {
       "supportsTablet": true
     },
-
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#160C05",
         "foregroundImage": "./assets/logo.png"
       }
     },
-
     "web": {
       "favicon": "./assets/logo.png"
     },
-
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-status-bar"
     ]
   }
 }

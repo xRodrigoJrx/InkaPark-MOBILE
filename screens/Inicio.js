@@ -15,32 +15,63 @@ import { Button, Card, Icon, Text } from "react-native-paper";
 
 import TarjetaInka from "../src/components/TarjetaInka";
 import { COLORES, FUENTES } from "../src/styles/paleta";
-import datosAtracciones from "../src/data/atracciones.json";
+import { obtenerAtracciones } from "../src/services/atraccionesService";
 
-export default function Inicio({ usuario, navigation }) {
+export default function Inicio({ navigation }) {
   const { width } = useWindowDimensions();
 
   const [atracciones, setAtracciones] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(false);
+  const [intentoCarga, setIntentoCarga] = useState(0);
 
   useEffect(() => {
-    try {
-      setAtracciones(datosAtracciones);
-    } catch (e) {
-      setError(true);
-    } finally {
-      setCargando(false);
-    }
-  }, []);
+    let cancelado = false;
 
-  // 🔥 Navegación
+    async function cargarAtracciones() {
+      setCargando(true);
+      setError(false);
+
+      try {
+        const datos = await obtenerAtracciones();
+
+        if (!cancelado) {
+          setAtracciones(datos);
+        }
+      } catch (errorCarga) {
+        console.warn(
+          "No se pudieron cargar las atracciones:",
+          errorCarga.code,
+          errorCarga.message
+        );
+
+        if (!cancelado) {
+          setError(true);
+        }
+      } finally {
+        if (!cancelado) {
+          setCargando(false);
+        }
+      }
+    }
+
+    cargarAtracciones();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [intentoCarga]);
+
   const irAAtracciones = () => navigation.navigate("Atracciones");
   const irAEspectaculos = () => navigation.navigate("Espectaculos");
   const irAGastronomia = () => navigation.navigate("Gastronomia");
 
   const irADetalle = (atraccion) =>
     navigation.navigate("DetalleAtraccion", { atraccion });
+
+  const reintentarCarga = () => {
+    setIntentoCarga((actual) => actual + 1);
+  };
 
   return (
     <View style={styles.contenedor}>
@@ -103,7 +134,6 @@ export default function Inicio({ usuario, navigation }) {
         <Text style={styles.tituloSeccion}>EXPERIENCIAS</Text>
 
         <View style={styles.contenedorExperiencias}>
-          {/* ATRACCIONES */}
           <Card
             style={styles.cardExperiencia}
             mode="outlined"
@@ -115,7 +145,6 @@ export default function Inicio({ usuario, navigation }) {
             </Card.Content>
           </Card>
 
-          {/* ESPECTÁCULOS */}
           <Card
             style={styles.cardExperiencia}
             mode="outlined"
@@ -127,7 +156,6 @@ export default function Inicio({ usuario, navigation }) {
             </Card.Content>
           </Card>
 
-          {/* GASTRONOMÍA */}
           <Card
             style={styles.cardExperiencia}
             mode="outlined"
@@ -157,10 +185,21 @@ export default function Inicio({ usuario, navigation }) {
           <Text style={styles.mensaje}>Cargando experiencias...</Text>
         )}
 
-        {error && (
-          <Text style={styles.mensaje}>
-            No se pudieron cargar las experiencias.
-          </Text>
+        {!cargando && error && (
+          <View>
+            <Text style={styles.mensaje}>
+              No se pudieron cargar las experiencias. Comprueba tu conexión
+              e inténtalo nuevamente.
+            </Text>
+
+            <Button
+              mode="outlined"
+              textColor={COLORES.doradoClaro}
+              onPress={reintentarCarga}
+            >
+              REINTENTAR
+            </Button>
+          </View>
         )}
 
         {!cargando && !error && (
@@ -170,6 +209,11 @@ export default function Inicio({ usuario, navigation }) {
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={styles.listaAtracciones}
+            ListEmptyComponent={
+              <Text style={styles.mensaje}>
+                No hay atracciones disponibles por el momento.
+              </Text>
+            }
             renderItem={({ item }) => (
               <Pressable onPress={() => irADetalle(item)}>
                 <TarjetaInka
@@ -219,7 +263,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
 
-  // HEADER
   header: {
     marginTop: 20,
     marginBottom: 15,
@@ -251,7 +294,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 
-  // HERO
   hero: {
     height: 230,
     borderRadius: 20,
@@ -297,7 +339,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
-  // TITULOS
   tituloSeccion: {
     color: COLORES.crema,
     fontFamily: FUENTES.principal,
@@ -307,7 +348,6 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
 
-  // EXPERIENCIAS
   contenedorExperiencias: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -335,7 +375,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  // ATRACCIONES
   filaTitulo: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -359,7 +398,6 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
 
-  // BANNER FINAL
   bannerFinal: {
     width: "100%",
     backgroundColor: COLORES.tarjeta,
