@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "name": "InkaPark",
+    "slug": "inkapark",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
@@ -10,10 +10,15 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.xrodrigo.inkapark",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#160C05",
         "foregroundImage": "./assets/logo.png"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/logo.png"
@@ -31,6 +36,11 @@
       ],
       "@react-native-community/datetimepicker",
       "expo-notifications"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b64cddcd-e0c5-4044-af6f-4ef8611583fa"
+      }
+    }
   }
 }
