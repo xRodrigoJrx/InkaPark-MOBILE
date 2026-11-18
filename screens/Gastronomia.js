@@ -21,14 +21,13 @@ import { useFocusEffect } from "@react-navigation/native";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
 import { obtenerComidas } from "../src/services/comidasService";
+import { obtenerImagenComida } from "../src/utils/imagenesComidas";
 
 const FUENTE_INCA = Platform.select({
   ios: "Georgia",
   android: "serif",
   default: "serif",
 });
-
-const IMAGEN_COMIDA = require("../assets/Comida.webp");
 
 const FILTROS = [
   { id: "todo", label: "Todo" },
@@ -127,7 +126,10 @@ export default function Gastronomia({ navigation }) {
         <View style={styles.cardContenido}>
           {/* IMAGEN Y PRECIO */}
           <View style={styles.imagenWrap}>
-            <Image source={IMAGEN_COMIDA} style={styles.imagen} />
+            <Image
+              source={obtenerImagenComida(item)}
+              style={styles.imagen}
+            />
             <View style={styles.imagenOverlay} />
 
             <View style={styles.precioBadge}>

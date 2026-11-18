@@ -293,18 +293,15 @@ export function AuthProvider({
 
     if (uidActual) {
       try {
-        await suspenderAvisos(
-          uidActual
-        );
+        await Promise.race([
+          suspenderAvisos(uidActual),
+          new Promise((resolve) =>
+            setTimeout(resolve, 2500)
+          ),
+        ]);
       } catch {
-        const error = new Error(
-          "No pudimos pausar tus recordatorios. Intenta cerrar sesión nuevamente."
-        );
-
-        error.code =
-          "notifications/pause-failed";
-
-        throw error;
+        // El cierre de sesión no debe bloquearse si no se
+        // pueden pausar los recordatorios locales.
       }
     }
 

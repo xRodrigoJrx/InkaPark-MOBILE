@@ -14,14 +14,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Button, Icon, Text } from "react-native-paper";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
+import { obtenerImagenEspectaculo } from "../src/utils/imagenesEspectaculos";
 
 const FUENTE_INCA = Platform.select({
   ios: "Georgia",
   android: "serif",
   default: "serif",
 });
-
-const IMAGEN_ESPECTACULO = require("../assets/Espectaculo.jpg");
 
 export default function DetalleEspectaculo({ route, navigation }) {
   const { espectaculo } = route.params || {};
@@ -53,7 +52,7 @@ export default function DetalleEspectaculo({ route, navigation }) {
         {/* 🖼️ HERO — solo imagen con degradado al fondo */}
         <View style={[styles.heroWrap, { height: alturaHero }]}>
           <Image
-            source={IMAGEN_ESPECTACULO}
+            source={obtenerImagenEspectaculo(espectaculo)}
             style={styles.heroImagen}
             resizeMode="cover"
           />

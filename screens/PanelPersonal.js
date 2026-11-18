@@ -18,7 +18,9 @@ import {
 
 import {
   Button,
+  Dialog,
   Icon,
+  Portal,
   Text,
 } from "react-native-paper";
 
@@ -136,6 +138,11 @@ export default function PanelPersonal({ rol }) {
 
   const [errorPendiente, setErrorPendiente] =
     useState(false);
+
+  const [
+    confirmarSalida,
+    setConfirmarSalida,
+  ] = useState(false);
 
   const [visor, setVisor] = useState({
     ancho: 0,
@@ -409,45 +416,32 @@ export default function PanelPersonal({ rol }) {
 
   function cerrarSesion() {
     if (bloqueo.current) return;
+    setConfirmarSalida(true);
+  }
 
-    Alert.alert(
-      "Cerrar sesión",
-      pendiente
-        ? "La validación pendiente se conservará para recuperarla con esta misma cuenta."
-        : "¿Quieres salir de tu cuenta de personal?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Cerrar sesión",
-          style: "destructive",
-          onPress: async () => {
-            if (bloqueo.current) return;
+  async function confirmarCerrarSesion() {
+    if (bloqueo.current) return;
 
-            bloqueo.current = true;
-            setOcupado(true);
+    setConfirmarSalida(false);
+    bloqueo.current = true;
+    setOcupado(true);
 
-            try {
-              await salir();
-            } catch {
-              if (montado.current) {
-                setMensaje(
-                  "No se pudo cerrar la sesión."
-                );
-              }
-            } finally {
-              bloqueo.current = false;
+    try {
+      await salir();
+    } catch (error) {
+      if (montado.current) {
+        setMensaje(
+          error?.message ||
+            "No se pudo cerrar la sesión."
+        );
+      }
+    } finally {
+      bloqueo.current = false;
 
-              if (montado.current) {
-                setOcupado(false);
-              }
-            }
-          },
-        },
-      ]
-    );
+      if (montado.current) {
+        setOcupado(false);
+      }
+    }
   }
 
   const puedeEscanear =
@@ -1228,6 +1222,50 @@ export default function PanelPersonal({ rol }) {
           </>
         )}
       </ScrollView>
+
+      <Portal>
+        <Dialog
+          visible={confirmarSalida}
+          onDismiss={() => {
+            if (!ocupado) {
+              setConfirmarSalida(false);
+            }
+          }}
+          style={styles.dialogo}
+        >
+          <Dialog.Title style={styles.dialogoTitulo}>
+            Cerrar sesión
+          </Dialog.Title>
+
+          <Dialog.Content>
+            <Text style={styles.dialogoTexto}>
+              {pendiente
+                ? "La validación pendiente se conservará para recuperarla con esta misma cuenta."
+                : "¿Quieres salir de tu cuenta de personal?"}
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Actions>
+            <Button
+              disabled={ocupado}
+              textColor={COLORES.doradoClaro}
+              onPress={() =>
+                setConfirmarSalida(false)
+              }
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              disabled={ocupado}
+              textColor={COLORES.error}
+              onPress={confirmarCerrarSesion}
+            >
+              Cerrar sesión
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }
@@ -1581,5 +1619,16 @@ const styles = StyleSheet.create({
     borderColor: COLORES.error,
     borderRadius: 15,
     marginTop: 6,
+  },
+  dialogo: {
+    backgroundColor: "#24160B",
+  },
+  dialogoTitulo: {
+    color: COLORES.crema,
+  },
+  dialogoTexto: {
+    color: COLORES.textoSecundario,
+    fontSize: 14,
+    lineHeight: 22,
   },
 });

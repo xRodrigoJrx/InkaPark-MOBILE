@@ -13,14 +13,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Button, Card, Icon, Text } from "react-native-paper";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
+import { obtenerImagenAtraccion } from "../src/utils/imagenesAtracciones";
 
 const FUENTE_INCA = Platform.select({
   ios: "Georgia",
   android: "serif",
   default: "serif",
 });
-
-const IMAGEN_ATRACCION = require("../assets/medio.png");
 
 export default function DetalleAtraccion({ route, navigation }) {
   const { atraccion } = route.params || {};
@@ -54,7 +53,10 @@ export default function DetalleAtraccion({ route, navigation }) {
       >
         {/* 🖼️ HERO */}
         <View style={styles.heroWrap}>
-          <Image source={IMAGEN_ATRACCION} style={styles.heroImagen} />
+          <Image
+            source={obtenerImagenAtraccion(atraccion)}
+            style={styles.heroImagen}
+          />
 
           <LinearGradient
             colors={[

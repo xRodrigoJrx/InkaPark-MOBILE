@@ -15,14 +15,13 @@ import { useFocusEffect } from "@react-navigation/native";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
 import { obtenerAtracciones } from "../src/services/atraccionesService";
+import { obtenerImagenAtraccion } from "../src/utils/imagenesAtracciones";
 
 const FUENTE_INCA = Platform.select({
   ios: "Georgia",
   android: "serif",
   default: "serif",
 });
-
-const IMAGEN_ATRACCION = require("../assets/medio.png");
 
 const FILTROS = [
   { id: "todas", label: "Todas" },
@@ -114,7 +113,10 @@ export default function Atracciones({ navigation }) {
         style={styles.cardContenido}
       >
         <View style={styles.cardImagenWrap}>
-          <Image source={IMAGEN_ATRACCION} style={styles.cardImagen} />
+          <Image
+            source={obtenerImagenAtraccion(item)}
+            style={styles.cardImagen}
+          />
         </View>
 
         <View style={styles.cardInfo}>

@@ -14,14 +14,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Button, Card, Icon, Text } from "react-native-paper";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
+import { obtenerImagenComida } from "../src/utils/imagenesComidas";
 
 const FUENTE_INCA = Platform.select({
   ios: "Georgia",
   android: "serif",
   default: "serif",
 });
-
-const IMAGEN_COMIDA = require("../assets/Comida.webp");
 
 export default function DetalleComida({ route, navigation }) {
   const { comida } = route.params || {};
@@ -53,7 +52,7 @@ export default function DetalleComida({ route, navigation }) {
         {/* 🖼️ HERO — solo imagen con degradado al fondo */}
         <View style={[styles.heroWrap, { height: alturaHero }]}>
           <Image
-            source={IMAGEN_COMIDA}
+            source={obtenerImagenComida(comida)}
             style={styles.heroImagen}
             resizeMode="cover"
           />

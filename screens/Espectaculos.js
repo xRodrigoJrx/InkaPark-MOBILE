@@ -21,14 +21,13 @@ import { useFocusEffect } from "@react-navigation/native";
 
 import { COLORES, FUENTES } from "../src/styles/paleta";
 import { obtenerEspectaculos } from "../src/services/espectaculosService";
+import { obtenerImagenEspectaculo } from "../src/utils/imagenesEspectaculos";
 
 const FUENTE_INCA = Platform.select({
   ios: "Georgia",
   android: "serif",
   default: "serif",
 });
-
-const IMAGEN_ESPECTACULO = require("../assets/Espectaculo.jpg");
 
 const FILTROS = [
   { id: "todos", label: "Todos" },
@@ -130,7 +129,7 @@ export default function Espectaculos({ navigation }) {
           {/* IMAGEN */}
           <View style={styles.imagenWrap}>
             <Image
-              source={IMAGEN_ESPECTACULO}
+              source={obtenerImagenEspectaculo(item)}
               style={styles.imagen}
             />
             <View style={styles.imagenOverlay} />
